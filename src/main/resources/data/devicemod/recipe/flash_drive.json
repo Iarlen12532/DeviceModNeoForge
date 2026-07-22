@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P", "C", "P"],
+  "key": {
+    "P": {"item": "devicemod:plastic"},
+    "C": {"item": "devicemod:circuit_board"}
+  },
+  "result": {"id": "devicemod:flash_drive", "count": 1}
+}

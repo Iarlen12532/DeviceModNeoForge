@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IRI", "RGR", "IRI"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "R": {"item": "minecraft:redstone"},
+    "G": {"item": "minecraft:gold_nugget"}
+  },
+  "result": {"id": "devicemod:circuit_board", "count": 2}
+}

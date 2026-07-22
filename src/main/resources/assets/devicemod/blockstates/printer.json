@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "devicemod:block/printer" },
+    "facing=south": { "model": "devicemod:block/printer", "y": 180 },
+    "facing=west":  { "model": "devicemod:block/printer", "y": 270 },
+    "facing=east":  { "model": "devicemod:block/printer", "y": 90 }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "devicemod:block/router_side",
+    "bottom": "devicemod:block/router_bottom",
+    "top": "devicemod:block/router_top",
+    "side": "devicemod:block/router_side",
+    "front": "devicemod:block/router_front_off"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 3],
+      "to": [13, 4, 13],
+      "faces": {
+        "down":  {"uv": [3, 3, 13, 13], "texture": "#bottom", "cullface": "down"},
+        "up":    {"uv": [3, 3, 13, 13], "texture": "#top"},
+        "north": {"uv": [3, 12, 13, 16], "texture": "#front"},
+        "south": {"uv": [3, 12, 13, 16], "texture": "#side"},
+        "west":  {"uv": [3, 12, 13, 16], "texture": "#side"},
+        "east":  {"uv": [3, 12, 13, 16], "texture": "#side"}
+      }
+    }
+  ]
+}

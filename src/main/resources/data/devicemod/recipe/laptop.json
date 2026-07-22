@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["PPP", "PCP", "PPP"],
+  "key": {
+    "P": {"item": "devicemod:plastic"},
+    "C": {"item": "devicemod:circuit_board"}
+  },
+  "result": {"id": "devicemod:laptop", "count": 1}
+}

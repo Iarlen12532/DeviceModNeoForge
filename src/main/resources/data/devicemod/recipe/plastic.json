@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "minecraft:coal"},
+    {"item": "minecraft:white_dye"}
+  ],
+  "result": {"id": "devicemod:plastic", "count": 4}
+}

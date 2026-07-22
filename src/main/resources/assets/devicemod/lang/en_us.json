@@ -1,0 +1,9 @@
+{
+  "itemGroup.devicemod": "MrCrayfish's Device Mod",
+  "block.devicemod.laptop": "Laptop",
+  "block.devicemod.printer": "Printer",
+  "block.devicemod.router": "Router",
+  "item.devicemod.flash_drive": "Flash Drive",
+  "item.devicemod.circuit_board": "Circuit Board",
+  "item.devicemod.plastic": "Plastic"
+}

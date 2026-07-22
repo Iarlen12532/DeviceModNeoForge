@@ -1,0 +1,6 @@
+{
+  "parent": "devicemod:block/router_off",
+  "textures": {
+    "front": "devicemod:block/router_front_on"
+  }
+}
