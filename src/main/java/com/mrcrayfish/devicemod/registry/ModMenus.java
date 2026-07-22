@@ -13,5 +13,5 @@ public class ModMenus {
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, DeviceMod.MOD_ID);
 
     public static final Supplier<MenuType<LaptopMenu>> LAPTOP = MENUS.register("laptop",
-            () -> IMenuTypeExtension.create(LaptopMenu::new));
+            () -> IMenuTypeExtension.create((windowId, inv, data) -> new LaptopMenu(windowId, inv)));
 }

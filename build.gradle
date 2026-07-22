@@ -66,10 +66,12 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     mavenLocal()
+    mavenCentral()
+    maven { url = "https://maven.neoforged.net/releases" }
 }
 
 dependencies {
-    implementation "com.mrcrayfish:framework-neoforge:${framework_version}"
+    // Nenhuma dependência externa por enquanto
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -85,7 +87,6 @@ tasks.withType(ProcessResources).configureEach {
             mod_version            : mod_version,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
-            framework_version      : framework_version,
     ]
     inputs.properties replaceProperties
 

@@ -39,6 +39,7 @@ public class LaptopScreen extends AbstractContainerScreen<LaptopMenu> {
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        // Renderiza a textura de fundo
         graphics.blit(BACKGROUND, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         renderDesktop(graphics);
     }
@@ -53,7 +54,10 @@ public class LaptopScreen extends AbstractContainerScreen<LaptopMenu> {
         int desktopWidth = this.imageWidth - 40;
         int desktopHeight = this.imageHeight - 60;
 
+        // Fundo da área de trabalho com cor do laptop
         graphics.fill(desktopX, desktopY, desktopX + desktopWidth, desktopY + desktopHeight, 0xFF000000 | (color & 0xFFFFFF));
+
+        // Barra de tarefas
         graphics.fill(desktopX, this.topPos + this.imageHeight - 30, desktopX + desktopWidth, this.topPos + this.imageHeight - 10, 0xFF333333);
     }
 

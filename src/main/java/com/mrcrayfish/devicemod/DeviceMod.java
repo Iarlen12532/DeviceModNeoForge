@@ -18,7 +18,7 @@ public class DeviceMod {
         LOGGER.info("Initializing MrCrayfish's Device Mod for NeoForge 1.21.1");
 
         ModBlocks.BLOCKS.register(modEventBus);
-        ModBlocks.BLOCK_ENTITIES.register(modEventBus);
+        ModBlocks.BLOCK_ENTITY_TYPES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModMenus.MENUS.register(modEventBus);
         ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);

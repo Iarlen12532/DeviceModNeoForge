@@ -1,10 +1,8 @@
 package com.mrcrayfish.devicemod.block;
 
 import com.mrcrayfish.devicemod.block.entity.LaptopBlockEntity;
-import com.mrcrayfish.devicemod.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -61,16 +59,16 @@ public class LaptopBlock extends HorizontalDirectionalBlock implements EntityBlo
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof LaptopBlockEntity laptop) {
             if (player.isShiftKeyDown()) {
-                // Toggle open/close
                 level.setBlock(pos, state.cycle(OPEN), 3);
+                return ItemInteractionResult.SUCCESS;
             } else if (state.getValue(OPEN)) {
-                // Open GUI
                 if (player instanceof ServerPlayer serverPlayer) {
                     serverPlayer.openMenu(laptop, pos);
                 }
+                return ItemInteractionResult.SUCCESS;
             }
         }
-        return ItemInteractionResult.SUCCESS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override

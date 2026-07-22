@@ -13,11 +13,12 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(DeviceMod.MOD_ID);
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, DeviceMod.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, DeviceMod.MOD_ID);
 
     // Blocos
     public static final DeferredBlock<LaptopBlock> LAPTOP = BLOCKS.registerBlock("laptop",
@@ -41,18 +42,16 @@ public class ModBlocks {
                     .sound(SoundType.METAL)
                     .noOcclusion());
 
-    // Block Entities
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, DeviceMod.MOD_ID);
-
-    public static final DeferredRegister<BlockEntityType<?>>.DeferredHolder<BlockEntityType<?>, BlockEntityType<LaptopBlockEntity>> LAPTOP_BE =
+    // Block Entities - FORMA CORRETA para NeoForge 1.21.1
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LaptopBlockEntity>> LAPTOP_BE =
             BLOCK_ENTITY_TYPES.register("laptop",
                     () -> BlockEntityType.Builder.of(LaptopBlockEntity::new, LAPTOP.get()).build(null));
 
-    public static final DeferredRegister<BlockEntityType<?>>.DeferredHolder<BlockEntityType<?>, BlockEntityType<PrinterBlockEntity>> PRINTER_BE =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PrinterBlockEntity>> PRINTER_BE =
             BLOCK_ENTITY_TYPES.register("printer",
                     () -> BlockEntityType.Builder.of(PrinterBlockEntity::new, PRINTER.get()).build(null));
 
-    public static final DeferredRegister<BlockEntityType<?>>.DeferredHolder<BlockEntityType<?>, BlockEntityType<RouterBlockEntity>> ROUTER_BE =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RouterBlockEntity>> ROUTER_BE =
             BLOCK_ENTITY_TYPES.register("router",
                     () -> BlockEntityType.Builder.of(RouterBlockEntity::new, ROUTER.get()).build(null));
 }
