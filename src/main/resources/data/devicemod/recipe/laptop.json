@@ -1,9 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": ["PPP", "PCP", "PPP"],
+  "pattern": ["PSP", "MCM", "PBP"],
   "key": {
     "P": {"item": "devicemod:plastic"},
-    "C": {"item": "devicemod:circuit_board"}
+    "S": {"item": "devicemod:screen"},
+    "M": {"item": "devicemod:motherboard"},
+    "C": {"item": "devicemod:cpu"},
+    "B": {"item": "devicemod:battery"}
   },
   "result": {"id": "devicemod:laptop", "count": 1}
 }

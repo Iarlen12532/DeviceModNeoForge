@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CRC", "GDG", "CRC"],
+  "key": {
+    "C": {"item": "devicemod:circuit_board"},
+    "R": {"item": "minecraft:redstone"},
+    "G": {"item": "minecraft:gold_ingot"},
+    "D": {"item": "minecraft:diamond"}
+  },
+  "result": {"id": "devicemod:gpu", "count": 1}
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" P ", "PIP", " P "],
+  "key": {
+    "P": {"item": "devicemod:plastic"},
+    "I": {"item": "minecraft:iron_ingot"}
+  },
+  "result": {"id": "devicemod:wheel", "count": 4}
+}

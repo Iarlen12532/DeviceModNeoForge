@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", "IRI", "III"],
+  "key": {
+    "I": {"item": "minecraft:iron_nugget"},
+    "R": {"item": "minecraft:redstone"}
+  },
+  "result": {"id": "devicemod:small_electric_motor", "count": 1}
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["PPP", "P P", "PPP"],
+  "key": {"P": {"item": "devicemod:plastic"}},
+  "result": {"id": "devicemod:plastic_frame", "count": 4}
+}

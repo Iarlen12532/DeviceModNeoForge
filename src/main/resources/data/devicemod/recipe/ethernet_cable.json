@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" P ", "CRC", " P "],
+  "key": {
+    "P": {"item": "devicemod:plastic"},
+    "C": {"item": "minecraft:copper_ingot"},
+    "R": {"item": "minecraft:redstone"}
+  },
+  "result": {"id": "devicemod:ethernet_cable", "count": 8}
+}

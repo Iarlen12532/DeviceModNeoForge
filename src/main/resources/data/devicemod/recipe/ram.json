@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CCC", "RRR", "CCC"],
+  "key": {
+    "C": {"item": "devicemod:circuit_board"},
+    "R": {"item": "minecraft:redstone"}
+  },
+  "result": {"id": "devicemod:ram", "count": 2}
+}

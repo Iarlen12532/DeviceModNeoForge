@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CCC", "CQC", "CCC"],
+  "key": {
+    "C": {"item": "devicemod:circuit_board"},
+    "Q": {"item": "minecraft:quartz"}
+  },
+  "result": {"id": "devicemod:solid_state_drive", "count": 1}
+}

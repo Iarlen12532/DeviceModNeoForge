@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/black_concrete",
+    "0": "minecraft:block/black_concrete",
+    "1": "minecraft:block/gray_concrete",
+    "2": "minecraft:block/anvil",
+    "3": "minecraft:block/stone",
+    "chair_color": "minecraft:block/white_wool"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2],
+      "to": [14, 14, 14],
+      "faces": {
+        "down":  {"uv": [2, 2, 14, 14], "texture": "#3", "cullface": "down"},
+        "up":    {"uv": [2, 2, 14, 14], "texture": "#chair_color"},
+        "north": {"uv": [2, 2, 14, 16], "texture": "#0"},
+        "south": {"uv": [2, 2, 14, 16], "texture": "#1"},
+        "west":  {"uv": [2, 2, 14, 16], "texture": "#2"},
+        "east":  {"uv": [2, 2, 14, 16], "texture": "#2"}
+      }
+    }
+  ]
+}

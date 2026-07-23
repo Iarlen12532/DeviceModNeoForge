@@ -1,10 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": ["PPP", "CRC", "PPP"],
+  "pattern": ["PWP", "CRC", "PAP"],
   "key": {
     "P": {"item": "devicemod:plastic"},
+    "W": {"item": "devicemod:wifi"},
     "C": {"item": "devicemod:circuit_board"},
-    "R": {"item": "minecraft:redstone_torch"}
+    "R": {"item": "minecraft:redstone_torch"},
+    "A": {"item": "devicemod:controller_unit"}
   },
   "result": {"id": "devicemod:router", "count": 1}
 }

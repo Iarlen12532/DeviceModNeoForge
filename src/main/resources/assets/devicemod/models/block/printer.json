@@ -1,23 +1,23 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "devicemod:block/printer_side",
-    "bottom": "devicemod:block/printer_bottom",
-    "top": "devicemod:block/printer_top",
-    "side": "devicemod:block/printer_side",
-    "front": "devicemod:block/printer_front"
+    "particle": "minecraft:block/anvil",
+    "0": "minecraft:block/anvil",
+    "1": "minecraft:block/cyan_terracotta",
+    "2": "minecraft:block/white_wool",
+    "3": "minecraft:block/stone"
   },
   "elements": [
     {
       "from": [2, 0, 2],
       "to": [14, 8, 14],
       "faces": {
-        "down":  {"uv": [2, 2, 14, 14], "texture": "#bottom", "cullface": "down"},
-        "up":    {"uv": [2, 2, 14, 14], "texture": "#top"},
-        "north": {"uv": [2, 8, 14, 16], "texture": "#front"},
-        "south": {"uv": [2, 8, 14, 16], "texture": "#side"},
-        "west":  {"uv": [2, 8, 14, 16], "texture": "#side"},
-        "east":  {"uv": [2, 8, 14, 16], "texture": "#side"}
+        "down":  {"uv": [2, 2, 14, 14], "texture": "#3", "cullface": "down"},
+        "up":    {"uv": [2, 2, 14, 14], "texture": "#1"},
+        "north": {"uv": [2, 8, 14, 16], "texture": "#0"},
+        "south": {"uv": [2, 8, 14, 16], "texture": "#3"},
+        "west":  {"uv": [2, 8, 14, 16], "texture": "#3"},
+        "east":  {"uv": [2, 8, 14, 16], "texture": "#3"}
       }
     }
   ]

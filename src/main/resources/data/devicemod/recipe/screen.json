@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GGG", "GDG", "GGG"],
+  "key": {
+    "G": {"item": "minecraft:glass_pane"},
+    "D": {"item": "minecraft:glowstone_dust"}
+  },
+  "result": {"id": "devicemod:screen", "count": 1}
+}

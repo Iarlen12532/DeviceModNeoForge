@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "minecraft:coal"},
+    {"item": "minecraft:clay_ball"}
+  ],
+  "result": {"id": "devicemod:plastic_unrefined", "count": 2}
+}

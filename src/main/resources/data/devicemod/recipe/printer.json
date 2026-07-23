@@ -1,8 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": ["PPP", "PCP", "P P"],
+  "pattern": ["PPP", "MCM", "P P"],
   "key": {
     "P": {"item": "devicemod:plastic"},
+    "M": {"item": "devicemod:small_electric_motor"},
     "C": {"item": "devicemod:circuit_board"}
   },
   "result": {"id": "devicemod:printer", "count": 1}

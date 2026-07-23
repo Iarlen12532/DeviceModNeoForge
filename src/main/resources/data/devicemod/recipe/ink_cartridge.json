@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "devicemod:plastic"},
+    {"item": "minecraft:ink_sac"},
+    {"item": "minecraft:black_dye"}
+  ],
+  "result": {"id": "devicemod:ink_cartridge", "count": 2}
+}

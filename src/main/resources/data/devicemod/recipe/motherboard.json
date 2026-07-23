@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CRC", "CSC", "CRC"],
+  "key": {
+    "C": {"item": "devicemod:circuit_board"},
+    "R": {"item": "minecraft:redstone"},
+    "S": {"item": "devicemod:screen"}
+  },
+  "result": {"id": "devicemod:motherboard", "count": 1}
+}
