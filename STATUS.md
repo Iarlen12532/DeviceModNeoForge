@@ -487,6 +487,27 @@ você quiser deixar 100% perfeito visualmente.
    resolvedor de versão "curinga" se perdia nisso. Troquei pra uma versão **fixa e exata**
    (`21.1.72`, a mesma que já estava fixada em `neoforge.mods.toml`) em vez de `21.1.+` -
    evita esse problema de resolução completamente.
+5. Com a dependência resolvida, o `compileJava` rodou de verdade e achou **23 erros reais
+   de código** (não mais de configuração do Gradle):
+   - `TOSMod.java`: import não usado de uma classe que não existe nessa versão
+     (`FMLJavaModLoadingContext`) - removido.
+   - `ComponentStats.java`: `StreamCodec.composite()` só tem overload até 6 campos, e eu
+     tinha 8 - reescrito o `STREAM_CODEC` manualmente (leitura/escrita direta no buffer)
+     em vez de usar o builder.
+   - **Todos os 6 blocos com BlockEntity** (`CaseBlock`, `RouterBlock`, `PrinterBlock`,
+     `MonitorBlock`, `IndustrialMonitorBlock`, `RedstoneLinkBlock`): faltava implementar
+     `codec()`, método abstrato exigido por `BaseEntityBlock` nessa versão (sistema de
+     codec de blocos) - adicionado em todos os 6, cada um com `simpleCodec(...)`.
+   - `ModDataComponents.java`: registry key errada (`NeoForgeRegistries.Keys.DATA_COMPONENT_TYPES`
+     não existe) - o certo é `net.minecraft.core.registries.Registries.DATA_COMPONENT_TYPE`
+     (registro vanilla, não é algo específico do NeoForge). Corrigido.
+   - `ModItems.java`: os 11 `BlockItem` registrados via `registerSimpleBlockItem()` estavam
+     com o tipo declarado errado (`DeferredHolder<Item,Item>` em vez de
+     `DeferredItem<BlockItem>`) - generics em Java são invariantes, então isso não compilava.
+     Corrigido o tipo de todos os 11.
+   - **Pendência em aberto:** os erros de `getTicker` (nos mesmos 6 blocos) podem ter sido
+     só "ruído" em cascata causado pelo `codec()` faltando - não dá pra confirmar sem
+     rodar de novo. Se aparecerem de novo no próximo log, olho com mais cuidado.
 
 **Gap técnico real (não é erro, é limitação do meu ambiente):** o projeto nunca teve o
 **Gradle Wrapper** (`gradlew`/`gradlew.bat`) gerado - eu não consigo criar esses arquivos

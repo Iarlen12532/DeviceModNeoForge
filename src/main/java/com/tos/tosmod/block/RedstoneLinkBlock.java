@@ -24,6 +24,11 @@ public class RedstoneLinkBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected com.mojang.serialization.MapCodec<? extends RedstoneLinkBlock> codec() {
+        return simpleCodec(RedstoneLinkBlock::new);
+    }
+
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new RedstoneLinkBlockEntity(pos, state);
     }

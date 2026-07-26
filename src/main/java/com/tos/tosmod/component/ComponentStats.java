@@ -2,7 +2,6 @@ package com.tos.tosmod.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
@@ -44,15 +43,28 @@ public record ComponentStats(
             Codec.STRING.fieldOf("series").forGetter(ComponentStats::series)
     ).apply(instance, ComponentStats::new));
 
-    public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, ComponentStats> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8.map(ComponentCategory::valueOf, Enum::name), ComponentStats::category,
-            ByteBufCodecs.VAR_INT, ComponentStats::tier,
-            ByteBufCodecs.VAR_INT, ComponentStats::performance,
-            ByteBufCodecs.VAR_INT, ComponentStats::wattDraw,
-            ByteBufCodecs.VAR_INT, ComponentStats::heatOutput,
-            ByteBufCodecs.VAR_INT, ComponentStats::capacity,
-            ByteBufCodecs.VAR_INT, ComponentStats::wattSupply,
-            ByteBufCodecs.STRING_UTF8, ComponentStats::series,
-            ComponentStats::new
+    // StreamCodec.composite() só tem overload até 6 campos - com 8 campos aqui, precisa
+    // escrever a codificação/decodificação manualmente em vez de usar o builder.
+    public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, ComponentStats> STREAM_CODEC = StreamCodec.of(
+            (buf, value) -> {
+                buf.writeUtf(value.category().name());
+                buf.writeVarInt(value.tier());
+                buf.writeVarInt(value.performance());
+                buf.writeVarInt(value.wattDraw());
+                buf.writeVarInt(value.heatOutput());
+                buf.writeVarInt(value.capacity());
+                buf.writeVarInt(value.wattSupply());
+                buf.writeUtf(value.series());
+            },
+            buf -> new ComponentStats(
+                    ComponentCategory.valueOf(buf.readUtf()),
+                    buf.readVarInt(),
+                    buf.readVarInt(),
+                    buf.readVarInt(),
+                    buf.readVarInt(),
+                    buf.readVarInt(),
+                    buf.readVarInt(),
+                    buf.readUtf()
+            )
     );
 }

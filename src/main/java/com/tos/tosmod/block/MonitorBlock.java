@@ -19,6 +19,11 @@ public class MonitorBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected com.mojang.serialization.MapCodec<? extends MonitorBlock> codec() {
+        return simpleCodec(MonitorBlock::new);
+    }
+
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new MonitorBlockEntity(pos, state);
     }

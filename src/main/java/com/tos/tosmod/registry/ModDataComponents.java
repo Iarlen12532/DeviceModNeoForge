@@ -4,14 +4,14 @@ import com.tos.tosmod.TOSMod;
 import com.tos.tosmod.component.ComponentStats;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class ModDataComponents {
 
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
-            DeferredRegister.create(NeoForgeRegistries.Keys.DATA_COMPONENT_TYPES, TOSMod.MOD_ID);
+            DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, TOSMod.MOD_ID);
 
     // Guarda os atributos técnicos (ComponentStats) em qualquer item de componente de hardware.
     public static final net.neoforged.neoforge.registries.DeferredHolder<DataComponentType<?>, DataComponentType<ComponentStats>> COMPONENT_STATS =

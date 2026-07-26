@@ -34,6 +34,15 @@ public class CaseBlock extends BaseEntityBlock {
         return definition;
     }
 
+    // Exigido pela versão atual de BaseEntityBlock (sistema de codec de blocos). A case
+    // captura sua própria CaseDefinition via closure - esse codec não é usado de verdade
+    // pra serialização neste mod (não temos datapacks reconstruindo cases), só satisfaz
+    // o contrato da classe abstrata.
+    @Override
+    protected com.mojang.serialization.MapCodec<? extends CaseBlock> codec() {
+        return simpleCodec(props -> new CaseBlock(props, this.definition));
+    }
+
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new CaseBlockEntity(pos, state);

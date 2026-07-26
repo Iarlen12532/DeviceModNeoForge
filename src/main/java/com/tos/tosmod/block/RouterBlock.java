@@ -32,6 +32,11 @@ public class RouterBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected com.mojang.serialization.MapCodec<? extends RouterBlock> codec() {
+        return simpleCodec(RouterBlock::new);
+    }
+
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new RouterBlockEntity(pos, state);
     }

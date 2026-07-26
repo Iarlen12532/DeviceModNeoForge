@@ -20,6 +20,11 @@ public class PrinterBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected com.mojang.serialization.MapCodec<? extends PrinterBlock> codec() {
+        return simpleCodec(PrinterBlock::new);
+    }
+
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new PrinterBlockEntity(pos, state);
     }

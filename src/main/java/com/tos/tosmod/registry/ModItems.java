@@ -97,27 +97,29 @@ public class ModItems {
             com.tos.tosmod.item.VideoCableItem::new);
 
     // --- BlockItems: sem isso nenhum bloco do mod pode ser pego/colocado pelo jogador.
-    // (bug de todas as fases anteriores - corrigido aqui, junto com o bloco novo da Fase 8) ---
-    public static final DeferredHolder<Item, Item> NOTEBOOK_GAMER_CASE_ITEM =
+    // (bug de todas as fases anteriores - corrigido aqui, junto com o bloco novo da Fase 8)
+    // Tipo é DeferredItem<BlockItem>, não DeferredHolder<Item,Item> - registerSimpleBlockItem
+    // devolve um tipo mais específico (BlockItem), e generics em Java são invariantes. ---
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> NOTEBOOK_GAMER_CASE_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.NOTEBOOK_GAMER_CASE);
-    public static final DeferredHolder<Item, Item> NOTEBOOK_THIN_CASE_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> NOTEBOOK_THIN_CASE_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.NOTEBOOK_THIN_CASE);
-    public static final DeferredHolder<Item, Item> TOWER_DESKTOP_CASE_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> TOWER_DESKTOP_CASE_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.TOWER_DESKTOP_CASE);
-    public static final DeferredHolder<Item, Item> TOWER_DESKTOP_CASE_MACPRO_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> TOWER_DESKTOP_CASE_MACPRO_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.TOWER_DESKTOP_CASE_MACPRO);
-    public static final DeferredHolder<Item, Item> ALL_IN_ONE_CASE_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> ALL_IN_ONE_CASE_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.ALL_IN_ONE_CASE);
-    public static final DeferredHolder<Item, Item> SERVER_RACK_CASE_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> SERVER_RACK_CASE_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.SERVER_RACK_CASE);
-    public static final DeferredHolder<Item, Item> ROUTER_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> ROUTER_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.ROUTER);
-    public static final DeferredHolder<Item, Item> PRINTER_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> PRINTER_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.PRINTER);
-    public static final DeferredHolder<Item, Item> MONITOR_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> MONITOR_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.MONITOR);
-    public static final DeferredHolder<Item, Item> REDSTONE_LINK_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> REDSTONE_LINK_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.REDSTONE_LINK);
-    public static final DeferredHolder<Item, Item> INDUSTRIAL_MONITOR_ITEM =
+    public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> INDUSTRIAL_MONITOR_ITEM =
             ITEMS.registerSimpleBlockItem(com.tos.tosmod.registry.ModBlocks.INDUSTRIAL_MONITOR);
 }
