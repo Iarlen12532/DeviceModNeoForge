@@ -468,26 +468,27 @@ você quiser deixar 100% perfeito visualmente.
   `run/`, etc).
 - `README.md` (novo) - passo a passo de como criar o repositório e subir o projeto.
 
-**1ª correção (build #28):** o plugin `net.neoforged.gradle:userdev:7.0.192` exige
-Gradle **8.13**, mas o workflow estava instalando a 8.10. Corrigido em
-`.github/workflows/build.yml`.
+**Histórico de correções de build (3 rodadas até compilar):**
+1. O plugin `net.neoforged.gradle:userdev:7.0.192` exige Gradle **8.13**, mas o workflow
+   estava instalando a 8.10 - corrigido em `.github/workflows/build.yml`.
+2. O bloco `runs {}` do `build.gradle` (usado só pra testar o mod localmente via
+   `gradle runClient`, não afeta a geração do `.jar`) tinha dois erros de sintaxe
+   (`logLevel` não existe nessa versão do NeoGradle; tipo de run `client` "não encontrado").
+   Removido o bloco inteiro - não é necessário pro GitHub Actions compilar o `.jar`. Se
+   quiser rodar o mod localmente pelo Gradle no futuro, a sintaxe certa depende da versão
+   exata do NeoGradle - melhor conferir a documentação oficial na hora.
+3. Faltava declarar o **repositório do NeoForge**
+   (`https://maven.neoforged.net/releases`) no bloco `repositories {}` do `build.gradle` -
+   só tinha `mavenCentral()`, mas a dependência do NeoForge em si mora nesse outro
+   repositório. Corrigido.
 
-**2ª correção aplicada:** o log seguinte mostrou dois erros reais, os dois vindo do bloco
-`runs {}` do `build.gradle` (usado só pra testar o mod localmente via `gradle runClient`,
-não afeta a geração do `.jar`): `logLevel` não existe nessa versão do NeoGradle, e o tipo
-de run `client` "não foi encontrado" (precisa ser registrado diferente nessa versão).
-Removi o bloco `runs {}` inteiro do `build.gradle` - não é necessário pro GitHub Actions
-compilar o `.jar` (só seria necessário se um dia quiser rodar `gradle runClient` local).
-Se precisar dele de volta no futuro, a sintaxe certa depende da versão exata do NeoGradle -
-melhor checar a documentação oficial na hora.
-
-**Gap técnico real:** o projeto nunca teve o **Gradle Wrapper** (`gradlew`/`gradlew.bat`)
-gerado - eu não consigo criar esses arquivos sem acesso à internet (o wrapper baixa um
-`.jar` específico do Gradle). Contornei isso no workflow do GitHub Actions instalando o
-Gradle direto no CI (`gradle/actions/setup-gradle`), então **a compilação pelo GitHub
-funciona normalmente**. Só fica pendente se um dia quiser compilar localmente fora do
-GitHub - nesse caso, rodar `gradle wrapper --gradle-version 8.10` uma vez (com Gradle
-instalado na máquina) resolve.
+**Gap técnico real (não é erro, é limitação do meu ambiente):** o projeto nunca teve o
+**Gradle Wrapper** (`gradlew`/`gradlew.bat`) gerado - eu não consigo criar esses arquivos
+sem acesso à internet (o wrapper baixa um `.jar` específico do Gradle). Contornei isso no
+workflow do GitHub Actions instalando o Gradle direto no CI
+(`gradle/actions/setup-gradle`), então **a compilação pelo GitHub funciona normalmente**.
+Só fica pendente se um dia quiser compilar localmente fora do GitHub - nesse caso, rodar
+`gradle wrapper --gradle-version 8.13` uma vez (com Gradle instalado na máquina) resolve.
 
 ## Como continuar
 

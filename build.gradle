@@ -16,6 +16,13 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 // Repositórios extra (necessário mais pra frente pra LuaJ na Fase 3)
 repositories {
     mavenCentral()
+    // Repositório do próprio NeoForge - sem isso, a dependência "net.neoforged:neoforge"
+    // não é encontrada (esse foi o erro real do build: "Could not find any version that
+    // matches net.neoforged:neoforge:21.1.+").
+    maven {
+        name = "NeoForged"
+        url = "https://maven.neoforged.net/releases"
+    }
 }
 
 // O bloco "runs" (pra testar o mod localmente com `gradle runClient`) foi removido daqui
