@@ -36,7 +36,11 @@ repositories {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    implementation "net.neoforged:neoforge:21.1.+"
+    // Versão fixa (não "21.1.+") - o resolvedor de versão dinâmica estava se perdendo com
+    // a lista de versões mais recentes do NeoForge (muito mais novas, de outra linha do
+    // Minecraft) que também aparecem no mesmo repositório. Uma versão exata e conhecida
+    // pra 1.21.1 evita esse problema de resolução por completo.
+    implementation "net.neoforged:neoforge:21.1.72"
 
     // LuaJ - interpretador Lua 100% em Java (sem JNI/biblioteca nativa), usado no terminal do TOS.
     implementation 'org.luaj:luaj-jse:3.0.1'

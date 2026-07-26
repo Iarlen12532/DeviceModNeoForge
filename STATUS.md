@@ -481,6 +481,12 @@ você quiser deixar 100% perfeito visualmente.
    (`https://maven.neoforged.net/releases`) no bloco `repositories {}` do `build.gradle` -
    só tinha `mavenCentral()`, mas a dependência do NeoForge em si mora nesse outro
    repositório. Corrigido.
+4. Com o repositório certo, o Gradle passou a achar o repositório mas não conseguia casar
+   a versão dinâmica `21.1.+` - o repositório hoje tem centenas de versões muito mais
+   novas (`26.2.x-beta`, de outra linha do Minecraft) misturadas na mesma listagem, e o
+   resolvedor de versão "curinga" se perdia nisso. Troquei pra uma versão **fixa e exata**
+   (`21.1.72`, a mesma que já estava fixada em `neoforge.mods.toml`) em vez de `21.1.+` -
+   evita esse problema de resolução completamente.
 
 **Gap técnico real (não é erro, é limitação do meu ambiente):** o projeto nunca teve o
 **Gradle Wrapper** (`gradlew`/`gradlew.bat`) gerado - eu não consigo criar esses arquivos
