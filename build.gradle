@@ -18,25 +18,13 @@ repositories {
     mavenCentral()
 }
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        logLevel = 'DEBUG'
-    }
-
-    client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', 'tosmod'
-    }
-
-    server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', 'tosmod'
-        programArgument '--nogui'
-    }
-
-    data {
-        programArguments.addAll '--mod', 'tosmod', '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-    }
-}
+// O bloco "runs" (pra testar o mod localmente com `gradle runClient`) foi removido daqui
+// de propósito - a sintaxe exata do DSL de "runs" varia entre versões do NeoGradle e
+// estava causando erro na compilação do CI (logLevel não existe nessa versão, e o tipo
+// de run "client" precisa ser registrado de um jeito diferente). Como o GitHub Actions só
+// precisa gerar o .jar (não rodar o jogo), tirei isso do caminho por enquanto. Se quiser
+// rodar o mod localmente pelo Gradle no futuro, a sintaxe certa depende da versão exata
+// do NeoGradle - melhor conferir a documentação/exemplos oficiais na hora.
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 

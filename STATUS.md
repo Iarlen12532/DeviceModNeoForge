@@ -468,10 +468,18 @@ você quiser deixar 100% perfeito visualmente.
   `run/`, etc).
 - `README.md` (novo) - passo a passo de como criar o repositório e subir o projeto.
 
-**Correção aplicada (build #28 falhou):** o log mostrou que o plugin `net.neoforged.gradle:userdev:7.0.192`
-exige Gradle **8.13** (`org.gradle.plugin.api-version` = 8.13), mas o workflow estava
-instalando a **8.10**. Corrigido em `.github/workflows/build.yml` (e no README) - já pode
-rodar de novo.
+**1ª correção (build #28):** o plugin `net.neoforged.gradle:userdev:7.0.192` exige
+Gradle **8.13**, mas o workflow estava instalando a 8.10. Corrigido em
+`.github/workflows/build.yml`.
+
+**2ª correção aplicada:** o log seguinte mostrou dois erros reais, os dois vindo do bloco
+`runs {}` do `build.gradle` (usado só pra testar o mod localmente via `gradle runClient`,
+não afeta a geração do `.jar`): `logLevel` não existe nessa versão do NeoGradle, e o tipo
+de run `client` "não foi encontrado" (precisa ser registrado diferente nessa versão).
+Removi o bloco `runs {}` inteiro do `build.gradle` - não é necessário pro GitHub Actions
+compilar o `.jar` (só seria necessário se um dia quiser rodar `gradle runClient` local).
+Se precisar dele de volta no futuro, a sintaxe certa depende da versão exata do NeoGradle -
+melhor checar a documentação oficial na hora.
 
 **Gap técnico real:** o projeto nunca teve o **Gradle Wrapper** (`gradlew`/`gradlew.bat`)
 gerado - eu não consigo criar esses arquivos sem acesso à internet (o wrapper baixa um
