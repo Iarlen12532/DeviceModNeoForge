@@ -33,6 +33,12 @@ repositories {
 // rodar o mod localmente pelo Gradle no futuro, a sintaxe certa depende da versão exata
 // do NeoGradle - melhor conferir a documentação/exemplos oficiais na hora.
 
+// Ativa o "jar-in-jar" do NeoForge - sem isso, dependências externas (LuaJ) ficam só na
+// classpath do Gradle durante a compilação, mas NÃO vão junto no .jar final do mod. Foi
+// exatamente isso que causou o crash em jogo (NoClassDefFoundError: org/luaj/vm2/LuaError)
+// toda vez que uma case tentava iniciar o terminal Lua.
+jarJar.enable()
+
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
@@ -42,8 +48,12 @@ dependencies {
     // pra 1.21.1 evita esse problema de resolução por completo.
     implementation "net.neoforged:neoforge:21.1.72"
 
-    // LuaJ - interpretador Lua 100% em Java (sem JNI/biblioteca nativa), usado no terminal do TOS.
-    implementation 'org.luaj:luaj-jse:3.0.1'
+    // LuaJ - interpretador Lua 100% em Java (sem JNI/biblioteca nativa), usado no terminal
+    // do TOS. jarJar(...) embute o .jar do LuaJ dentro do .jar final do mod - sem isso, o
+    // jogo crasha com NoClassDefFoundError assim que qualquer computador tenta ligar.
+    jarJar(implementation("org.luaj:luaj-jse:3.0.1")) {
+        jarJar.pin(it, "3.0.1")
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

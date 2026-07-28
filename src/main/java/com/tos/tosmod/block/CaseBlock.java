@@ -57,11 +57,15 @@ public class CaseBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        // Contagem de crash (PSU) e cálculo de temperatura (Fase 2) rodam aqui, uma vez por tick.
         if (level.isClientSide()) {
-            return null;
+            return null; // toda essa lógica é de servidor, cliente só reflete o estado salvo
         }
-        return createTickerHelper(type, com.tos.tosmod.registry.ModBlockEntities.CASE_BLOCK_ENTITY.get(),
-                (lvl, pos, st, blockEntity) -> blockEntity.tick());
+        return (lvl, pos, st, blockEntity) -> {
+            if (blockEntity instanceof CaseBlockEntity caseEntity) {
+                caseEntity.tick();
+            }
+        };
     }
 
     @Override
@@ -77,12 +81,6 @@ public class CaseBlock extends BaseEntityBlock {
             // TosScreens decide entre o Desktop (Fase 9, se já tem SO instalado) e o
             // terminal cru (Fase 3/4, sem SO) - ela mesma lê o estado já sincronizado do
             // BlockEntity e manda comandos pro servidor via RunLuaCommandPayload.
-            com.tos.tosmod.client.screen.TosScreens.open(pos);
-        }
-        return InteractionResult.sidedSuccess(level.isClientSide());
-    }
-}
-ia RunLuaCommandPayload.
             com.tos.tosmod.client.screen.TosScreens.open(pos);
         }
         return InteractionResult.sidedSuccess(level.isClientSide());

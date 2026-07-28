@@ -540,6 +540,42 @@ O build compilou! Testando em jogo, você achou 3 problemas reais, todos corrigi
    coisa do mod via `/give`. Criado `registry/ModCreativeTabs.java` com todos os blocos e
    itens do mod numa aba própria ("TOS Mod" / "itemGroup.tosmod" no lang).
 
+## Correções pós-teste em jogo (crash real + assets)
+
+Você mandou o log de crash + um print. Analisei o log de verdade (não só um resumo) e
+achei 3 problemas reais, todos corrigidos:
+
+1. **CRASH principal:** `NoClassDefFoundError: org/luaj/vm2/LuaError` ao colocar
+   QUALQUER case no mundo. Causa: o LuaJ estava só na classpath do Gradle durante a
+   compilação, mas nunca foi empacotado dentro do `.jar` final do mod - assim que uma
+   case tentava iniciar o terminal Lua (`CaseBlockEntity` constructor), a classe não
+   existia em tempo de execução e o jogo crashava. Corrigido em `build.gradle` com
+   `jarJar.enable()` + `jarJar(implementation(...))` - o mecanismo "jar dentro do jar" do
+   NeoForge, que embute o LuaJ de verdade dentro do `.jar` do mod.
+2. **`JsonSyntaxException: Missing axis`** em 6 modelos (`all_in_one_case`, `monitor`,
+   `notebook_gamer_case`, `notebook_thin_case`, `router`, `tower_desktop_case_macpro`) -
+   o Blockbench exportou rotações de peças (tela do notebook, antena do roteador, base do
+   monitor, etc) num formato de 3 eixos (x/y/z) que o Minecraft não entende - o formato
+   dele só aceita 1 eixo por vez, com ângulo entre -45° e 45°. Resultado: 2 rotações deram
+   pra converter certinho pro formato do Minecraft (eram só 1 eixo mesmo); as outras 28
+   (rotações de verdade em vários eixos ao mesmo tempo, ou ângulos como 90°/-105° que o
+   Minecraft não aceita em elemento único) tiveram que ser **removidas** - a peça continua
+   existindo, só que sem aquela inclinação específica. Se quiser a inclinação exata de
+   volta, precisa remodelar essas partes no Blockbench sem usar rotação livre (por
+   exemplo, construindo a peça já na posição/ângulo final via coordenadas de caixa, em
+   vez de rotacionar uma caixa reta).
+3. **`printer_Visor.png`** tinha letra maiúscula no nome - caminhos de textura no
+   Minecraft têm que ser 100% minúsculo. Renomeado pra `printer_visor.png` e corrigida a
+   referência no `printer.json`. Conferi todos os outros arquivos do mod - não tinha mais
+   nenhum com maiúscula.
+
+**Sobre a análise que você colou:** ela acertou os problemas de JSON e do nome de arquivo,
+mas inventou uma classe `ServerBlockEntity`/`ServerBlock` que não existe no meu código -
+o bloco do servidor de verdade usa a mesma `CaseBlockEntity` de todas as cases (Fase 1).
+O crash real não tinha nada a ver com isso - era o LuaJ faltando no jar mesmo. O aviso
+sobre conflito Sodium/Podium é do SEU ambiente de mods (não é algo que eu precise/consiga
+corrigir dentro do tosmod).
+
 ## Como continuar
 
 Se abrir uma conversa nova, cole este arquivo inteiro (ou a seção relevante) e diga em qual

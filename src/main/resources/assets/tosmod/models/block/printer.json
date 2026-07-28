@@ -3,7 +3,7 @@
   "credit": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
   "textures": {
     "0": "tosmod:block/printer_base_impresora",
-    "1": "tosmod:block/printer_Visor",
+    "1": "tosmod:block/printer_visor",
     "particle": "tosmod:block/printer_base_impresora"
   },
   "elements": [

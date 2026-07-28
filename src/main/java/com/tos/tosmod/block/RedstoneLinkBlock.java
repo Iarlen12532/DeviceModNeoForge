@@ -38,13 +38,16 @@ public class RedstoneLinkBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
-        @Override
+    @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide()) {
             return null;
         }
-        return createTickerHelper(type, com.tos.tosmod.registry.ModBlockEntities.REDSTONE_LINK_BLOCK_ENTITY.get(),
-                (lvl, pos, st, blockEntity) -> blockEntity.tick());
+        return (lvl, pos, st, blockEntity) -> {
+            if (blockEntity instanceof RedstoneLinkBlockEntity link) {
+                link.tick();
+            }
+        };
     }
 
     @Override
