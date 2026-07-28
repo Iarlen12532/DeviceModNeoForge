@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# Runs de teste do Minecraft (mundo, logs, etc - gerado ao rodar `runClient`/`runServer`)
+run/
+runs/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.eclipse/
+.settings/
+.classpath
+.project
+bin/
+
+# Recursos gerados automaticamente (datagen)
+src/generated/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Segredos/local
+local.properties
