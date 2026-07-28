@@ -3,6 +3,7 @@ package com.tos.tosmod;
 import com.tos.tosmod.network.ModNetworking;
 import com.tos.tosmod.registry.ModBlockEntities;
 import com.tos.tosmod.registry.ModBlocks;
+import com.tos.tosmod.registry.ModCreativeTabs;
 import com.tos.tosmod.registry.ModDataComponents;
 import com.tos.tosmod.registry.ModItems;
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +30,7 @@ public class TOSMod {
         ModItems.ITEMS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        ModCreativeTabs.CREATIVE_TABS.register(modEventBus);
         modEventBus.addListener(ModNetworking::register);
     }
 }

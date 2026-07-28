@@ -523,6 +523,23 @@ workflow do GitHub Actions instalando o Gradle direto no CI
 Só fica pendente se um dia quiser compilar localmente fora do GitHub - nesse caso, rodar
 `gradle wrapper --gradle-version 8.13` uma vez (com Gradle instalado na máquina) resolve.
 
+## Correções pós-build (testado em jogo)
+
+O build compilou! Testando em jogo, você achou 3 problemas reais, todos corrigidos agora:
+
+1. **`all_in_one_case`, `monitor` e `tower_desktop_case_macpro` apareciam como o "cubo
+   quebrado" magenta/preto** (modelo ausente, diferente de textura ausente) - a causa
+   real: esses 3 modelos tinham faces sobrando do Blockbench apontando pra uma textura
+   `#missing` que não existe em lugar nenhum. Quando isso acontece, o Minecraft **descarta
+   o modelo inteiro** (não só aquela face) e cai no fallback do cubo quebrado - isso
+   também explicava a textura "bugada" no inventário desses mesmos blocos (o ícone do
+   item usa o mesmo modelo quebrado). Corrigido: as faces `#missing` desses 3 arquivos
+   agora apontam pra uma textura válida já existente no próprio modelo (reserva, até você
+   completar o mapeamento de verdade no Blockbench se quiser).
+2. **Nenhuma aba de criativo existia** - bug desde a Fase 1, só dava pra pegar qualquer
+   coisa do mod via `/give`. Criado `registry/ModCreativeTabs.java` com todos os blocos e
+   itens do mod numa aba própria ("TOS Mod" / "itemGroup.tosmod" no lang).
+
 ## Como continuar
 
 Se abrir uma conversa nova, cole este arquivo inteiro (ou a seção relevante) e diga em qual

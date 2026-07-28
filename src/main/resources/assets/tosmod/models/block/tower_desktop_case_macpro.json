@@ -3361,7 +3361,7 @@
             7,
             12.7
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "east": {
           "uv": [
@@ -3370,7 +3370,7 @@
             15,
             12.7
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "south": {
           "uv": [
@@ -3379,7 +3379,7 @@
             7.7,
             12.7
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "west": {
           "uv": [
@@ -3388,7 +3388,7 @@
             1.7,
             12.7
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "up": {
           "uv": [
@@ -3397,7 +3397,7 @@
             7.7,
             1.7
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "down": {
           "uv": [
@@ -3406,7 +3406,7 @@
             7.7,
             15
           ],
-          "texture": "#missing"
+          "texture": "#0"
         }
       }
     },
@@ -4212,7 +4212,7 @@
             2,
             4
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "east": {
           "uv": [
@@ -4221,7 +4221,7 @@
             1.5,
             4
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "south": {
           "uv": [
@@ -4230,7 +4230,7 @@
             1.7,
             4
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "west": {
           "uv": [
@@ -4239,7 +4239,7 @@
             1.7,
             4
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "up": {
           "uv": [
@@ -4248,7 +4248,7 @@
             1.7,
             1.7
           ],
-          "texture": "#missing"
+          "texture": "#0"
         },
         "down": {
           "uv": [
@@ -4257,7 +4257,7 @@
             1.7,
             1.5
           ],
-          "texture": "#missing"
+          "texture": "#0"
         }
       }
     }
