@@ -56,7 +56,7 @@ public class CaseBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         // Contagem de crash (PSU) e cálculo de temperatura (Fase 2) rodam aqui, uma vez por tick.
         if (level.isClientSide()) {
             return null; // toda essa lógica é de servidor, cliente só reflete o estado salvo

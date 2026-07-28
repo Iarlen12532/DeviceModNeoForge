@@ -508,6 +508,12 @@ você quiser deixar 100% perfeito visualmente.
    - **Pendência em aberto:** os erros de `getTicker` (nos mesmos 6 blocos) podem ter sido
      só "ruído" em cascata causado pelo `codec()` faltando - não dá pra confirmar sem
      rodar de novo. Se aparecerem de novo no próximo log, olho com mais cuidado.
+6. Os erros de `getTicker` continuaram (só em `CaseBlock`, `RouterBlock`,
+   `RedstoneLinkBlock` - os 3 que realmente usam ticker), e dessa vez o motivo ficou claro:
+   `attempting to assign weaker access privileges; was public` - eu declarei o método como
+   `protected`, mas a interface `EntityBlock` exige `public` (métodos de interface são
+   implicitamente públicos, e Java não deixa reduzir a visibilidade ao sobrescrever).
+   Trocado `protected` → `public` nos 3 blocos.
 
 **Gap técnico real (não é erro, é limitação do meu ambiente):** o projeto nunca teve o
 **Gradle Wrapper** (`gradlew`/`gradlew.bat`) gerado - eu não consigo criar esses arquivos
