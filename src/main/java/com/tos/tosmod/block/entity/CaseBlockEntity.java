@@ -183,6 +183,11 @@ public class CaseBlockEntity extends BlockEntity {
         return inventory;
     }
 
+    /** Layout dos slots (índice -> tipo) - usado pela HardwareMenu pra rotular e restringir cada slot. */
+    public List<SlotType> getSlotLayout() {
+        return slotLayout;
+    }
+
     public CaseDefinition getDefinition() {
         return definition;
     }

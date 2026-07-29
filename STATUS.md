@@ -576,6 +576,41 @@ O crash real não tinha nada a ver com isso - era o LuaJ faltando no jar mesmo. 
 sobre conflito Sodium/Podium é do SEU ambiente de mods (não é algo que eu precise/consiga
 corrigir dentro do tosmod).
 
+## Correção grande: menu de hardware (não existia forma de montar o computador!)
+
+Você achou o buraco mais sério até agora: **nunca existiu nenhuma interação pra colocar
+CPU/RAM/GPU/storage/PSU/bateria/teclado/mouse/processador de rede dentro de uma case.**
+Os slots existiam no código desde a Fase 1 (`CaseBlockEntity.inventory`), mas nada
+conectava isso a um clique do jogador - por isso nada ligava nunca, e por isso tentar
+instalar o TOS sempre dizia "a máquina precisa estar ligada".
+
+**Corrigido com um menu de verdade (`AbstractContainerMenu`), igual um baú:**
+- `menu/HardwareMenu.java` (novo) - um slot por posição da `CaseDefinition`, cada um só
+  aceita o tipo certo de peça (`SlotItemHandler.mayPlace()` confere a `ComponentCategory`
+  contra o `SlotType` daquele slot específico). Usa o sistema de menu padrão do
+  Minecraft, então a sincronização cliente↔servidor já vem de graça - não precisou
+  nenhum pacote de rede novo pra isso.
+- `client/screen/HardwareScreen.java` (novo) - mostra os slots (visual fosco simples,
+  igual as outras telas), com tooltip do tipo de slot quando ele está vazio (ex: "Socket
+  de CPU/APU") pra você saber o que vai onde.
+- `registry/ModMenus.java` + `client/ClientSetup.java` (novos) - registro do `MenuType` e
+  da tela associada a ele.
+- **Como abrir:** agachar + clicar na case abre o hardware (retirar/inserir peças). Clique
+  normal (sem agachar) continua abrindo o terminal/desktop de sempre - igual o padrão que
+  já existia no roteador pra nome/senha.
+- Mensagens de "falta CPU/RAM/storage/PSU/bateria" (`PowerState.java`) agora incluem a
+  dica "agache + clique pra abrir o hardware".
+
+## Sobre os monitores com textura "borrada"
+
+As rotações que precisei remover (ver correção anterior sobre `JsonSyntaxException:
+Missing axis`) eram justamente as que posicionavam a TELA dentro da moldura do monitor -
+sem elas, a tela fica sem a inclinação/posição certa e aparece só como um retângulo preto
+com um risco. Isso não tem conserto por código - precisa remodelar essas peças no
+Blockbench sem depender de rotação livre (por exemplo, construindo a tela já na posição
+certa via coordenadas de caixa, em vez de rotacionar uma caixa reta). Os modelos afetados:
+`all_in_one_case`, `monitor`, `tower_desktop_case_macpro`.
+
 ## Como continuar
 
 Se abrir uma conversa nova, cole este arquivo inteiro (ou a seção relevante) e diga em qual

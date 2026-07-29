@@ -6,11 +6,11 @@ package com.tos.tosmod.component;
  */
 public enum PowerState {
     ON("Ligado"),
-    NO_CPU("Falta CPU ou APU"),
-    NO_RAM("Falta memória RAM"),
-    NO_STORAGE("Falta armazenamento (HD/SSD/NVMe)"),
-    NO_BATTERY("Falta bateria"),
-    NO_PSU("Falta fonte de alimentação"),
+    NO_CPU("Falta CPU ou APU (agache + clique na case pra abrir o hardware)"),
+    NO_RAM("Falta memória RAM (agache + clique na case pra abrir o hardware)"),
+    NO_STORAGE("Falta armazenamento (agache + clique na case pra abrir o hardware)"),
+    NO_BATTERY("Falta bateria (agache + clique na case pra abrir o hardware)"),
+    NO_PSU("Falta fonte de alimentação (agache + clique na case pra abrir o hardware)"),
     UNSTABLE_PSU("Ligado, mas a fonte não aguenta os componentes - vai travar em breve"),
     OVERHEATING("Ligado, mas superaquecendo - vai travar se não esfriar"),
     CRASHED("Travou - desligue e ligue de novo pra tentar reiniciar");

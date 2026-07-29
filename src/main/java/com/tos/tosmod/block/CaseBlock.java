@@ -70,6 +70,18 @@ public class CaseBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (player.isCrouching()) {
+            // Agachado = mexer no hardware (inserir/retirar CPU, RAM, GPU, etc). Clique
+            // normal (sem agachar) continua abrindo a tela do terminal/desktop de sempre.
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CaseBlockEntity) {
+                player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                        (windowId, inv, p) -> new com.tos.tosmod.menu.HardwareMenu(windowId, inv, pos),
+                        net.minecraft.network.chat.Component.literal("Hardware")
+                ), buf -> buf.writeBlockPos(pos));
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+
         if (!definition.hasIntegratedScreen()) {
             if (!level.isClientSide()) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.literal(
