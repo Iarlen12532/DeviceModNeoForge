@@ -611,6 +611,25 @@ Blockbench sem depender de rotação livre (por exemplo, construindo a tela já 
 certa via coordenadas de caixa, em vez de rotacionar uma caixa reta). Os modelos afetados:
 `all_in_one_case`, `monitor`, `tower_desktop_case_macpro`.
 
+## Correções pós-teste: slots invisíveis + roteador sem interface de verdade
+
+Você mandou print mostrando a tela de hardware "toda branca" (slots grudados, sem
+distinção nenhuma) e apontou que o roteador não tinha interface de verdade. Os dois
+corrigidos:
+
+- **`HardwareScreen`**: cada slot agora tem borda (efeito "afundado" - escuro em cima/
+  esquerda, claro embaixo/direita, igual o visual padrão de inventário) - antes, todos os
+  slots eram só quadrados da mesma cor grudados uns nos outros, por isso pareciam "um
+  bloco branco só", sem dar pra saber onde clicar. Também adicionei uma linha de status
+  (ex: "Falta CPU ou APU") embaixo dos slots de hardware - não existe "botão de ligar" de
+  propósito, a case liga sozinha assim que os componentes certos estão instalados; essa
+  linha deixa isso visível na hora.
+- **Roteador ganhou o mesmo tratamento**: em vez de precisar segurar o processador de
+  rede na mão e acertar o clique, agora clique normal abre um menu de verdade
+  (`menu/RouterMenu.java` + `client/screen/RouterScreenMenu.java`) com o slot do
+  processador visível (arrasta e solta, igual um baú). Agachado + clique continua abrindo
+  a tela de nome/senha de sempre.
+
 ## Como continuar
 
 Se abrir uma conversa nova, cole este arquivo inteiro (ou a seção relevante) e diga em qual

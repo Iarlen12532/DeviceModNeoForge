@@ -49,7 +49,7 @@ public class HardwareMenu extends AbstractContainerMenu {
         }
 
         int hardwareRows = (layout.size() + COLUMNS - 1) / COLUMNS;
-        int invTop = 18 + hardwareRows * SLOT_SIZE + 14;
+        int invTop = 18 + hardwareRows * SLOT_SIZE + 26; // +26 = espaço pra linha de status
 
         // Inventário do jogador (3 linhas + hotbar), padrão vanilla.
         for (int row = 0; row < 3; row++) {

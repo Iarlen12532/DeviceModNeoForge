@@ -2,6 +2,7 @@ package com.tos.tosmod.registry;
 
 import com.tos.tosmod.TOSMod;
 import com.tos.tosmod.menu.HardwareMenu;
+import com.tos.tosmod.menu.RouterMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -18,5 +19,10 @@ public class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<HardwareMenu>> HARDWARE_MENU =
             MENUS.register("hardware_menu", () -> IMenuTypeExtension.create(
                     (windowId, inventory, buffer) -> new HardwareMenu(windowId, inventory, buffer.readBlockPos())
+            ));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<RouterMenu>> ROUTER_MENU =
+            MENUS.register("router_menu", () -> IMenuTypeExtension.create(
+                    (windowId, inventory, buffer) -> new RouterMenu(windowId, inventory, buffer.readBlockPos())
             ));
 }

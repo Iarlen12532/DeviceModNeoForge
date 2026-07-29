@@ -11,18 +11,23 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 /**
- * Tela do menu de hardware (corrige um buraco real: não existia NENHUMA forma do
- * jogador inserir CPU/RAM/GPU/etc numa case antes disso). Visual simples (retângulos
- * foscos, sem textura de fundo customizada) - mesma linha das outras telas do mod, leve
- * pro ambiente Android/gl4es.
+ * Tela do menu de hardware. Visual simples (sem textura de fundo customizada), mas com
+ * borda visível em cada slot - sem isso, slots adjacentes da mesma cor se misturam num
+ * bloco só e ficam impossíveis de distinguir (bug reportado: "interface toda branca").
  */
 @OnlyIn(Dist.CLIENT)
 public class HardwareScreen extends AbstractContainerScreen<HardwareMenu> {
 
+    private static final int SLOT_BG = 0xFFC6C6C6;
+    private static final int SLOT_BORDER_DARK = 0xFF373737;
+    private static final int SLOT_BORDER_LIGHT = 0xFFFFFFFF;
+
     public HardwareScreen(HardwareMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
-        this.imageHeight = 18 + ((menu.getCaseEntity().getSlotLayout().size() + 8) / 9) * 18 + 96;
+        int hardwareRows = (menu.getCaseEntity().getSlotLayout().size() + 8) / 9;
+        int invTop = 18 + hardwareRows * 18 + 26; // igual ao cálculo em HardwareMenu
+        this.imageHeight = invTop + 82; // 3 linhas (54) + vão (4) + hotbar (18) + margem (6)
     }
 
     @Override
@@ -31,13 +36,23 @@ public class HardwareScreen extends AbstractContainerScreen<HardwareMenu> {
         int y = topPos;
         ScreenStyle.fillRounded(graphics, x, y, x + imageWidth, y + imageHeight, ScreenStyle.WINDOW_BG);
 
-        // Desenha um quadrado atrás de cada slot pra ficar visível sem precisar de textura -
-        // cor muda um pouco conforme o tipo, só pra ajudar a diferenciar visualmente.
+        // Cada slot ganha um "afundado" com borda escura em cima/esquerda e clara embaixo/
+        // direita (efeito bevel simples) - sem isso, slots vizinhos da mesma cor se fundem
+        // visualmente num bloco só, ilegível.
         for (Slot slot : menu.slots) {
             int slotX = x + slot.x - 1;
             int slotY = y + slot.y - 1;
-            graphics.fill(slotX, slotY, slotX + 18, slotY + 18, 0xFF8B8B8B);
+            graphics.fill(slotX, slotY, slotX + 18, slotY + 18, SLOT_BORDER_DARK);
+            graphics.fill(slotX + 1, slotY + 1, slotX + 17, slotY + 17, SLOT_BORDER_LIGHT);
+            graphics.fill(slotX + 1, slotY + 1, slotX + 16, slotY + 16, SLOT_BG);
         }
+
+        // Status ao vivo da máquina, embaixo dos slots de hardware - não existe "botão de
+        // ligar": ela liga sozinha assim que os componentes certos estiverem instalados.
+        // Isso deixa claro na hora o que ainda falta.
+        String status = menu.getCaseEntity().getPowerState().getDescription();
+        int statusY = y + 18 + ((menu.getCaseEntity().getSlotLayout().size() + 8) / 9) * 18 + 2;
+        graphics.drawString(font, status, x + 8, statusY, 0x404040, false);
     }
 
     @Override
