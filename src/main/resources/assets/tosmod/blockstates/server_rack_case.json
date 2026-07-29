@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "tosmod:block/server_rack_case"
+    }
+  }
+}
