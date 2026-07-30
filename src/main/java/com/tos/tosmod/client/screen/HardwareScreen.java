@@ -2,18 +2,23 @@ package com.tos.tosmod.client.screen;
 
 import com.tos.tosmod.component.SlotType;
 import com.tos.tosmod.menu.HardwareMenu;
+import com.tos.tosmod.network.SetPowerSwitchPayload;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Tela do menu de hardware. Visual simples (sem textura de fundo customizada), mas com
  * borda visível em cada slot - sem isso, slots adjacentes da mesma cor se misturam num
  * bloco só e ficam impossíveis de distinguir (bug reportado: "interface toda branca").
+ * Também tem o botão de ligar/desligar - sem ele apertado, a case fica sempre desligada
+ * mesmo com todo o hardware certo instalado.
  */
 @OnlyIn(Dist.CLIENT)
 public class HardwareScreen extends AbstractContainerScreen<HardwareMenu> {
@@ -22,12 +27,34 @@ public class HardwareScreen extends AbstractContainerScreen<HardwareMenu> {
     private static final int SLOT_BORDER_DARK = 0xFF373737;
     private static final int SLOT_BORDER_LIGHT = 0xFFFFFFFF;
 
+    private Button powerButton;
+
     public HardwareScreen(HardwareMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
         int hardwareRows = (menu.getCaseEntity().getSlotLayout().size() + 8) / 9;
         int invTop = 18 + hardwareRows * 18 + 26; // igual ao cálculo em HardwareMenu
         this.imageHeight = invTop + 82; // 3 linhas (54) + vão (4) + hotbar (18) + margem (6)
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        int hardwareRows = (menu.getCaseEntity().getSlotLayout().size() + 8) / 9;
+        int buttonY = topPos + 18 + hardwareRows * 18 + 2;
+        powerButton = Button.builder(powerButtonLabel(), b -> togglePower())
+                .bounds(leftPos + imageWidth - 76, buttonY, 68, 16)
+                .build();
+        addRenderableWidget(powerButton);
+    }
+
+    private Component powerButtonLabel() {
+        return Component.literal(menu.getCaseEntity().isPowerSwitchOn() ? "Desligar" : "Ligar");
+    }
+
+    private void togglePower() {
+        boolean newState = !menu.getCaseEntity().isPowerSwitchOn();
+        PacketDistributor.sendToServer(new SetPowerSwitchPayload(menu.getCaseEntity().getBlockPos(), newState));
     }
 
     @Override
@@ -47,12 +74,14 @@ public class HardwareScreen extends AbstractContainerScreen<HardwareMenu> {
             graphics.fill(slotX + 1, slotY + 1, slotX + 16, slotY + 16, SLOT_BG);
         }
 
-        // Status ao vivo da máquina, embaixo dos slots de hardware - não existe "botão de
-        // ligar": ela liga sozinha assim que os componentes certos estiverem instalados.
-        // Isso deixa claro na hora o que ainda falta.
+        // Status ao vivo da máquina, embaixo dos slots de hardware.
         String status = menu.getCaseEntity().getPowerState().getDescription();
-        int statusY = y + 18 + ((menu.getCaseEntity().getSlotLayout().size() + 8) / 9) * 18 + 2;
+        int statusY = y + 18 + ((menu.getCaseEntity().getSlotLayout().size() + 8) / 9) * 18 + 4;
         graphics.drawString(font, status, x + 8, statusY, 0x404040, false);
+
+        if (powerButton != null) {
+            powerButton.setMessage(powerButtonLabel());
+        }
     }
 
     @Override

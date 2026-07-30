@@ -70,7 +70,11 @@ public class CaseBlockEntity extends BlockEntity {
     /** Índice do slot -> tipo de slot, calculado uma vez a partir da CaseDefinition. */
     private final List<SlotType> slotLayout;
 
-    private PowerState powerState = PowerState.NO_CPU;
+    private PowerState powerState = PowerState.OFF;
+
+    /** Interruptor manual (o botão de ligar/desligar) - sem ele em true, a case fica
+     *  sempre OFF, mesmo com todo o hardware certo instalado. */
+    private boolean powerSwitch = false;
     private CrashCause lastCrashCause = CrashCause.NONE;
 
     /** Quantos ticks faltam pra travar quando a PSU não aguenta o consumo total, ou quando está superaquecendo. */
@@ -87,11 +91,15 @@ public class CaseBlockEntity extends BlockEntity {
     private static final int WARNING_TEMPERATURE = 70;   // a partir daqui, é só aviso (throttling visual futuro)
     private static final int CRITICAL_TEMPERATURE = 100; // a partir daqui, começa a contagem de crash
     private static final int MAX_TEMPERATURE = 120;       // teto - não sobe infinitamente
-    private static final int HEAT_RISE_DIVISOR = 4;       // quanto maior, mais devagar esquenta
-    private static final int COOL_RATE_ON = 1;            // quanto esfria por tick quando ligado e sem excesso de calor
-    private static final int COOL_RATE_OFF = 2;           // quanto esfria por tick quando desligado (mais rápido)
+    // Divisor bem maior que antes (era 4) + acumulador com casas decimais - o cálculo antigo
+    // usava divisão inteira com um piso forçado de "pelo menos +1 grau/tick", o que fazia
+    // QUALQUER excesso de calor (mesmo 1 unidade) superaquecer em poucos segundos. Agora um
+    // excesso pequeno sobe bem devagar (minutos), só um excesso grande sobe rápido de verdade.
+    private static final float HEAT_RISE_DIVISOR = 100f;
+    private static final float COOL_RATE_ON = 0.5f;       // quanto esfria por tick quando ligado e sem excesso de calor
+    private static final float COOL_RATE_OFF = 1.5f;      // quanto esfria por tick quando desligado (mais rápido)
 
-    private int temperature = AMBIENT_TEMPERATURE;
+    private float temperature = AMBIENT_TEMPERATURE;
 
     /** Terminal Lua cru (Fase 3) - só roda enquanto powerState.isOn(). */
     private final LuaComputer luaComputer = new LuaComputer();
@@ -196,8 +204,9 @@ public class CaseBlockEntity extends BlockEntity {
         return powerState;
     }
 
+    /** Temperatura arredondada pra exibição - o cálculo interno usa casas decimais (ver updateTemperature). */
     public int getTemperature() {
-        return temperature;
+        return Math.round(temperature);
     }
 
     public CrashCause getLastCrashCause() {
@@ -257,6 +266,16 @@ public class CaseBlockEntity extends BlockEntity {
      * você precisa desligar e ligar de novo.
      */
     public void recalculatePowerState() {
+        if (!powerSwitch) {
+            // Interruptor desligado - a case fica OFF mesmo que todo o hardware esteja
+            // certo. Isso é o que o botão de ligar/desligar controla.
+            if (powerState != PowerState.OFF) {
+                powerState = PowerState.OFF;
+                crashTicksRemaining = 0;
+                setChanged();
+            }
+            return;
+        }
         if (powerState == PowerState.CRASHED) {
             return;
         }
@@ -299,10 +318,12 @@ public class CaseBlockEntity extends BlockEntity {
                 return;
             }
         } else {
-            ComponentStats psu = installed.stream()
+            int totalPsuSupply = installed.stream()
                     .filter(s -> s.category() == ComponentCategory.PSU)
-                    .findFirst().orElse(null);
-            if (psu == null) {
+                    .mapToInt(ComponentStats::wattSupply)
+                    .sum();
+            boolean hasPsu = installed.stream().anyMatch(s -> s.category() == ComponentCategory.PSU);
+            if (!hasPsu) {
                 powerState = PowerState.NO_PSU;
                 crashTicksRemaining = 0;
                 return;
@@ -313,7 +334,7 @@ public class CaseBlockEntity extends BlockEntity {
                     .mapToInt(ComponentStats::wattDraw)
                     .sum();
 
-            if (psu.wattSupply() < totalDraw) {
+            if (totalPsuSupply < totalDraw) {
                 // Liga mesmo assim - mas entra em contagem regressiva pro crash.
                 // Se já estava instável, não reinicia a contagem (senão trocar peça sem
                 // resolver o problema recomeçaria o timer de graça).
@@ -904,7 +925,7 @@ public class CaseBlockEntity extends BlockEntity {
 
         int netHeat = getTotalHeatOutput() - definition.baseCoolingCapacity();
         if (netHeat > 0) {
-            temperature = Math.min(MAX_TEMPERATURE, temperature + Math.max(1, netHeat / HEAT_RISE_DIVISOR));
+            temperature = Math.min(MAX_TEMPERATURE, temperature + netHeat / HEAT_RISE_DIVISOR);
         } else if (temperature > AMBIENT_TEMPERATURE) {
             temperature = Math.max(AMBIENT_TEMPERATURE, temperature - COOL_RATE_ON);
         }
@@ -939,6 +960,30 @@ public class CaseBlockEntity extends BlockEntity {
             recalculatePowerState();
             setChanged();
         }
+    }
+
+    /**
+     * Chamado pelo botão de ligar/desligar. Desligar sempre limpa qualquer crash (é um
+     * ciclo de força completo, igual desligar um PC na tomada); ligar reavalia tudo do
+     * zero, inclusive saindo de um CRASHED anterior.
+     */
+    public void setPowerSwitch(boolean on) {
+        this.powerSwitch = on;
+        if (!on) {
+            powerState = PowerState.OFF;
+            crashTicksRemaining = 0;
+        } else if (powerState == PowerState.CRASHED || powerState == PowerState.OFF) {
+            powerState = PowerState.NO_CPU; // reseta pra forçar reavaliação completa do zero
+        }
+        recalculatePowerState();
+        setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public boolean isPowerSwitchOn() {
+        return powerSwitch;
     }
 
     /** Soma o calor de todos os componentes instalados - usado no cálculo de temperatura (updateTemperature()). */
@@ -990,8 +1035,9 @@ public class CaseBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
         tag.putString("power_state", powerState.name());
+        tag.putBoolean("power_switch", powerSwitch);
         tag.putInt("crash_ticks_remaining", crashTicksRemaining);
-        tag.putInt("temperature", temperature);
+        tag.putFloat("temperature", temperature);
         tag.putString("last_crash_cause", lastCrashCause.name());
 
         ListTag historyTag = new ListTag();
@@ -1039,11 +1085,14 @@ public class CaseBlockEntity extends BlockEntity {
         if (tag.contains("power_state")) {
             powerState = PowerState.valueOf(tag.getString("power_state"));
         }
+        if (tag.contains("power_switch")) {
+            powerSwitch = tag.getBoolean("power_switch");
+        }
         if (tag.contains("crash_ticks_remaining")) {
             crashTicksRemaining = tag.getInt("crash_ticks_remaining");
         }
         if (tag.contains("temperature")) {
-            temperature = tag.getInt("temperature");
+            temperature = tag.getFloat("temperature");
         }
         if (tag.contains("last_crash_cause")) {
             lastCrashCause = CrashCause.valueOf(tag.getString("last_crash_cause"));

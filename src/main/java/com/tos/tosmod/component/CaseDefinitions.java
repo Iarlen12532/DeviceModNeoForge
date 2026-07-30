@@ -17,7 +17,7 @@ public final class CaseDefinitions {
             .slot(SlotType.STORAGE_SLOT, 2)
             .slot(SlotType.BATTERY_SLOT, 1)
             .portable(true)
-            .cooling(30) // notebook gamer tem mais espaço pra cooler que um fino, mas menos que desktop
+            .cooling(90) // notebook gamer tem mais espaço pra cooler que um fino, mas menos que desktop
             .build();
 
     public static final CaseDefinition NOTEBOOK_THIN = new CaseDefinition.Builder("notebook_thin")
@@ -26,7 +26,7 @@ public final class CaseDefinitions {
             .slot(SlotType.STORAGE_SLOT, 1)
             .slot(SlotType.BATTERY_SLOT, 1)
             .portable(true)
-            .cooling(15) // pouco espaço pra dissipar calor - combina com APU, não com GPU dedicada
+            .cooling(60) // pouco espaço pra dissipar calor - combina com APU, não com GPU dedicada
             .build();
 
     public static final CaseDefinition TOWER_DESKTOP = new CaseDefinition.Builder("tower_desktop")
@@ -38,7 +38,7 @@ public final class CaseDefinitions {
             .slot(SlotType.KEYBOARD_SLOT, 1)
             .slot(SlotType.MOUSE_SLOT, 1)
             .portable(false)
-            .cooling(60)
+            .cooling(140)
             .hasIntegratedScreen(false)
             .build();
 
@@ -50,7 +50,7 @@ public final class CaseDefinitions {
             .slot(SlotType.KEYBOARD_SLOT, 1)
             .slot(SlotType.MOUSE_SLOT, 1)
             .portable(false)
-            .cooling(35) // parecido com o notebook: pouco espaço interno, pensado pra APU
+            .cooling(70) // parecido com o notebook: pouco espaço interno, pensado pra APU
             .build();
 
     public static final CaseDefinition SERVER_RACK = new CaseDefinition.Builder("server_rack")
@@ -58,9 +58,9 @@ public final class CaseDefinitions {
             .slot(SlotType.GPU_SLOT, 4)
             .slot(SlotType.RAM_SLOT, 8)
             .slot(SlotType.STORAGE_SLOT, 8)
-            .slot(SlotType.PSU_SLOT, 2)
+            .slot(SlotType.PSU_SLOT, 4)
             .portable(false)
-            .cooling(120)
+            .cooling(280)
             .hasIntegratedScreen(false)
             .build();
 }

@@ -4,7 +4,6 @@ import com.tos.tosmod.block.entity.CaseBlockEntity;
 import com.tos.tosmod.network.RunLuaCommandPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -21,6 +20,9 @@ import java.util.List;
  * área de saída no meio que reaproveita o MESMO histórico do terminal (o app rodado pelo
  * dock nada mais é que um runLuaCommand com o conteúdo do arquivo).
  *
+ * Sem caixa de texto separada - digita direto na janela do terminal embutida, igual a
+ * TerminalScreen (a linha atual aparece com um "_" piscando no final).
+ *
  * Visual: cantos "arredondados" baratos e cores foscas (ver ScreenStyle) - inspirado no
  * macOS anterior ao 26, sem blur real, pra não pesar no ambiente Android/Mali/gl4es.
  * Ícones dos apps são só quadrados com a primeira letra do nome - os modelos/texturas
@@ -30,9 +32,11 @@ import java.util.List;
 public class DesktopScreen extends Screen {
 
     private final BlockPos pos;
-    private EditBox inputBox;
     private List<String> dockApps = new ArrayList<>();
     private int hoveredDockIndex = -1;
+    private final StringBuilder currentLine = new StringBuilder();
+    private long lastBlinkTime = 0;
+    private boolean cursorVisible = true;
 
     public DesktopScreen(BlockPos pos) {
         super(Component.literal("TOS"));
@@ -51,17 +55,6 @@ public class DesktopScreen extends Screen {
             return caseEntity;
         }
         return null;
-    }
-
-    @Override
-    protected void init() {
-        int boxWidth = Math.min(320, width - 40);
-        inputBox = new EditBox(font, (width - boxWidth) / 2, height - 46, boxWidth, 18,
-                Component.literal("comando"));
-        inputBox.setMaxLength(4096);
-        inputBox.setHint(Component.literal("terminal: digite lua, ou salve um app com fs.save(nome, codigo)"));
-        addRenderableWidget(inputBox);
-        setInitialFocus(inputBox);
     }
 
     @Override
@@ -91,7 +84,21 @@ public class DesktopScreen extends Screen {
         int windowBottom = dockTop - 6;
         ScreenStyle.fillRounded(graphics, panelLeft, windowTop, panelRight, windowBottom, ScreenStyle.PANEL_BG);
 
-        List<String> history = caseEntity.getTerminalHistory();
+        boolean canType = caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard();
+        if (!canType && currentLine.length() > 0) {
+            currentLine.setLength(0);
+        }
+
+        List<String> history = new ArrayList<>(caseEntity.getTerminalHistory());
+        if (canType) {
+            long now = System.currentTimeMillis();
+            if (now - lastBlinkTime > 500) {
+                cursorVisible = !cursorVisible;
+                lastBlinkTime = now;
+            }
+            history.add("> " + currentLine + (cursorVisible ? "_" : ""));
+        }
+
         int lineHeight = 10;
         int maxLines = (windowBottom - windowTop - 10) / lineHeight;
         int startIndex = Math.max(0, history.size() - maxLines);
@@ -101,7 +108,7 @@ public class DesktopScreen extends Screen {
             y += lineHeight;
         }
 
-        // Dock (embaixo) - um ícone por app salvo via fs.save(), mais o input do terminal.
+        // Dock (embaixo) - um ícone por app salvo via fs.save().
         ScreenStyle.fillRounded(graphics, panelLeft, dockTop, panelRight, height - 24, ScreenStyle.DOCK_BG);
         dockApps = new ArrayList<>(caseEntity.getVirtualFiles().keySet());
         hoveredDockIndex = -1;
@@ -126,12 +133,6 @@ public class DesktopScreen extends Screen {
             graphics.drawString(font, dockApps.get(hoveredDockIndex), panelLeft + 8, dockTop - 10, ScreenStyle.TEXT_LIGHT);
         }
 
-        boolean canType = caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard();
-        inputBox.setEditable(canType);
-        if (!canType) {
-            inputBox.setValue("");
-        }
-
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
@@ -139,7 +140,7 @@ public class DesktopScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         CaseBlockEntity caseEntity = getCaseEntity();
         if (caseEntity != null && !caseEntity.hasMouse()) {
-            return false; // sem mouse instalado - igual TerminalScreen, só teclado funciona
+            return false; // sem mouse instalado - só teclado funciona
         }
         if (hoveredDockIndex >= 0 && hoveredDockIndex < dockApps.size() && caseEntity != null
                 && caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard()) {
@@ -154,15 +155,37 @@ public class DesktopScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if ((keyCode == 257 || keyCode == 335) && inputBox.isFocused()) {
-            submitCommand();
-            return true;
+        CaseBlockEntity caseEntity = getCaseEntity();
+        boolean canType = caseEntity != null && caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard();
+        if (canType) {
+            if (keyCode == 257 || keyCode == 335) {
+                submitCommand();
+                return true;
+            }
+            if (keyCode == 259) {
+                if (currentLine.length() > 0) {
+                    currentLine.deleteCharAt(currentLine.length() - 1);
+                }
+                return true;
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        CaseBlockEntity caseEntity = getCaseEntity();
+        boolean canType = caseEntity != null && caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard();
+        if (canType && currentLine.length() < 4096) {
+            currentLine.append(codePoint);
+            return true;
+        }
+        return super.charTyped(codePoint, modifiers);
+    }
+
     private void submitCommand() {
-        String command = inputBox.getValue();
+        String command = currentLine.toString();
+        currentLine.setLength(0);
         if (command.isBlank()) {
             return;
         }
@@ -171,7 +194,6 @@ public class DesktopScreen extends Screen {
             return;
         }
         PacketDistributor.sendToServer(new RunLuaCommandPayload(pos, command));
-        inputBox.setValue("");
     }
 
     @Override

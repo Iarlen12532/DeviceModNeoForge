@@ -5,6 +5,7 @@ package com.tos.tosmod.component;
  * diferente pro jogador (e depois, uma tela diferente no boot do TOS).
  */
 public enum PowerState {
+    OFF("Desligado (aperte o botão de ligar)"),
     ON("Ligado"),
     NO_CPU("Falta CPU ou APU (agache + clique na case pra abrir o hardware)"),
     NO_RAM("Falta memória RAM (agache + clique na case pra abrir o hardware)"),
@@ -13,7 +14,7 @@ public enum PowerState {
     NO_PSU("Falta fonte de alimentação (agache + clique na case pra abrir o hardware)"),
     UNSTABLE_PSU("Ligado, mas a fonte não aguenta os componentes - vai travar em breve"),
     OVERHEATING("Ligado, mas superaquecendo - vai travar se não esfriar"),
-    CRASHED("Travou - desligue e ligue de novo pra tentar reiniciar");
+    CRASHED("Travou - aperte o botão de ligar de novo pra tentar reiniciar");
 
     private final String description;
 

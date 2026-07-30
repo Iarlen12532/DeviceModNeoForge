@@ -44,5 +44,15 @@ public class ModNetworking {
                     }
                 })
         );
+
+        registrar.playToServer(
+                SetPowerSwitchPayload.TYPE,
+                SetPowerSwitchPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player().level().getBlockEntity(payload.pos()) instanceof CaseBlockEntity caseEntity) {
+                        caseEntity.setPowerSwitch(payload.on());
+                    }
+                })
+        );
     }
 }

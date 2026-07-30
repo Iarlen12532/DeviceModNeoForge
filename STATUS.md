@@ -649,6 +649,42 @@ ele apareça no jogo (criativo, `/give`, drop, crafting futuro) já nasce com a 
 os atributos certos, sem depender de nenhum passo extra. `ComponentStatsDefaults.java`
 foi removido (ficou obsoleto - os valores agora moram direto no registro dos itens).
 
+## Correções grandes: temperatura, botão de ligar, fontes do servidor, terminal
+
+Você reportou 4 problemas de uma vez - todos corrigidos:
+
+**1. Superaquecimento quase instantâneo (bug real de matemática).** O cálculo de
+temperatura tinha `Math.max(1, netHeat / divisor)` - isso forçava **pelo menos +1 grau
+por tick** sempre que sobrasse QUALQUER calor, mesmo 1 unidade, fazendo qualquer
+combinação esquentar de 20° a 100° em poucos segundos. Corrigido: temperatura agora usa
+um acumulador com casas decimais (era `int`, virou `float` internamente, arredondado só
+na hora de mostrar), sem piso forçado, e o divisor de subida foi bem aumentado (era 4,
+agora 100) - um excesso pequeno de calor sobe bem devagar (minutos), só um excesso grande
+de verdade esquenta rápido. Além disso, **a capacidade de resfriamento de todas as cases
+foi bem aumentada** (notebook fino 15→60, notebook gamer 30→90, all-in-one 35→70, torre
+60→140, servidor 120→280) - os valores antigos eram baixos demais até pra builds básicas.
+
+**2. Servidor com 2 fontes de 1000W "não dava conta"** - achei um segundo bug junto: o
+código só somava a capacidade da PRIMEIRA fonte instalada, ignorando as outras! Corrigido
+pra somar TODAS as fontes instaladas. Também aumentei o servidor de 2 pra **4 slots de
+PSU**, dando bem mais margem pra builds extremas (múltiplas CPUs/GPUs top de linha).
+
+**3. Botão de ligar/desligar de verdade.** Antes a case ligava sozinha assim que tinha
+hardware suficiente, sem controle nenhum do jogador - e travar exigia trocar peça sem
+nenhum jeito claro de reiniciar. Agora existe um interruptor manual
+(`CaseBlockEntity.powerSwitch`, default desligado): com ele desligado, a case fica sempre
+OFF mesmo com hardware completo; um botão "Ligar"/"Desligar" foi adicionado na
+`HardwareScreen` (`network/SetPowerSwitchPayload.java` novo) que liga/desliga na hora, e
+também serve pra reiniciar depois de um crash (desligar+ligar limpa o travamento).
+
+**4. Terminal sem a barra de digitação separada.** Removida a `EditBox` de
+`TerminalScreen` e `DesktopScreen` - agora você digita DIRETO no corpo do terminal, com um
+cursor `_` piscando no final da linha atual, igual um terminal de verdade (sem caixa
+separada embaixo). Sobre o "borrado" persistente que você descreveu: não consegui
+confirmar se é um bug real de renderização do mod ou um artefato da própria screenshot/
+foto (ficou incerto pelas imagens) - se continuar acontecendo depois dessas mudanças, me
+manda um vídeo curto ou tenta reproduzir de novo que eu olho com mais cuidado.
+
 ## Como continuar
 
 Se abrir uma conversa nova, cole este arquivo inteiro (ou a seção relevante) e diga em qual

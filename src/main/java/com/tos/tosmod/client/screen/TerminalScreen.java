@@ -5,7 +5,6 @@ import com.tos.tosmod.block.entity.CaseBlockEntity;
 import com.tos.tosmod.network.RunLuaCommandPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -20,6 +19,9 @@ import java.util.List;
  * Fase 4: interface gráfica MÍNIMA do TOS - por enquanto só um terminal cru (texto puro,
  * sem janelas/dock/ícones ainda - isso é Fase 9, quando os modelos/texturas entrarem).
  *
+ * Sem caixa de texto separada - você digita DIRETO no corpo do terminal, igual um
+ * terminal de verdade (a linha atual aparece com um "_" piscando no final).
+ *
  * Desenho propositalmente simples (retângulos sólidos, sem blur/sombra real) - o ambiente
  * alvo é Android via PojavLauncher/Mojo com gl4es, então nada de shader customizado aqui.
  */
@@ -27,8 +29,10 @@ import java.util.List;
 public class TerminalScreen extends Screen {
 
     private final BlockPos pos;
-    private EditBox inputBox;
     private List<String> cachedHistory = new ArrayList<>();
+    private final StringBuilder currentLine = new StringBuilder();
+    private long lastBlinkTime = 0;
+    private boolean cursorVisible = true;
 
     public TerminalScreen(BlockPos pos) {
         super(Component.literal("Terminal"));
@@ -39,17 +43,6 @@ public class TerminalScreen extends Screen {
      *  isolada aqui dentro, sem vazar referência de classe cliente pro CaseBlock em si. */
     public static void openFor(BlockPos pos) {
         Minecraft.getInstance().setScreen(new TerminalScreen(pos));
-    }
-
-    @Override
-    protected void init() {
-        int boxWidth = Math.min(320, width - 40);
-        inputBox = new EditBox(font, (width - boxWidth) / 2, height - 30, boxWidth, 18,
-                Component.literal("comando"));
-        inputBox.setMaxLength(4096);
-        inputBox.setHint(Component.literal("digite um comando lua e aperte enter"));
-        addRenderableWidget(inputBox);
-        setInitialFocus(inputBox);
     }
 
     private CaseBlockEntity getCaseEntity() {
@@ -70,7 +63,7 @@ public class TerminalScreen extends Screen {
         int panelLeft = width / 2 - 160;
         int panelRight = width / 2 + 160;
         int panelTop = 20;
-        int panelBottom = height - 40;
+        int panelBottom = height - 20;
         ScreenStyle.fillRounded(graphics, panelLeft, panelTop, panelRight, panelBottom, ScreenStyle.PANEL_BG);
 
         CaseBlockEntity caseEntity = getCaseEntity();
@@ -95,21 +88,34 @@ public class TerminalScreen extends Screen {
             graphics.drawString(font, warning.toString(), panelLeft + 6, panelTop + 16, 0xFFAA00);
         }
 
-        // Corpo: histórico do terminal, as últimas linhas que cabem no painel.
+        boolean canType = caseEntity.getPowerState().isOn() && hasKeyboard;
+        if (!canType && currentLine.length() > 0) {
+            currentLine.setLength(0);
+        }
+
+        // Corpo: histórico do terminal + a linha sendo digitada agora, com cursor piscando -
+        // sem caixa de texto separada, digita direto igual um terminal de verdade.
         cachedHistory = caseEntity.getTerminalHistory();
         int lineHeight = 10;
         int historyTop = panelTop + 30;
-        int maxLines = (panelBottom - historyTop) / lineHeight;
-        int startIndex = Math.max(0, cachedHistory.size() - maxLines);
-        int y = historyTop;
-        for (int i = startIndex; i < cachedHistory.size(); i++) {
-            graphics.drawString(font, cachedHistory.get(i), panelLeft + 6, y, 0xCCCCCC, false);
-            y += lineHeight;
+        int bodyBottom = panelBottom - 8;
+        int maxLines = (bodyBottom - historyTop) / lineHeight;
+
+        List<String> displayLines = new ArrayList<>(cachedHistory);
+        if (canType) {
+            long now = System.currentTimeMillis();
+            if (now - lastBlinkTime > 500) {
+                cursorVisible = !cursorVisible;
+                lastBlinkTime = now;
+            }
+            displayLines.add("> " + currentLine + (cursorVisible ? "_" : ""));
         }
 
-        inputBox.setEditable(caseEntity.getPowerState().isOn() && hasKeyboard);
-        if (!caseEntity.getPowerState().isOn() || !hasKeyboard) {
-            inputBox.setValue("");
+        int startIndex = Math.max(0, displayLines.size() - maxLines);
+        int y = historyTop;
+        for (int i = startIndex; i < displayLines.size(); i++) {
+            graphics.drawString(font, displayLines.get(i), panelLeft + 6, y, 0xCCCCCC, false);
+            y += lineHeight;
         }
 
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -121,7 +127,7 @@ public class TerminalScreen extends Screen {
         CaseBlockEntity caseEntity = getCaseEntity();
         if (caseEntity != null && !caseEntity.hasMouse()) {
             // Sem mouse instalado, o jogador não consegue clicar em nada dentro da tela -
-            // só teclado funciona (se o foco já estiver na caixa de comando desde o início).
+            // só teclado funciona (digitar não depende de clicar em lugar nenhum agora).
             return false;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -129,16 +135,37 @@ public class TerminalScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // Enter (257) ou Numpad Enter (335) envia o comando.
-        if ((keyCode == 257 || keyCode == 335) && inputBox.isFocused()) {
-            submitCommand();
-            return true;
+        CaseBlockEntity caseEntity = getCaseEntity();
+        boolean canType = caseEntity != null && caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard();
+        if (canType) {
+            if (keyCode == 257 || keyCode == 335) { // Enter / Numpad Enter
+                submitCommand();
+                return true;
+            }
+            if (keyCode == 259) { // Backspace
+                if (currentLine.length() > 0) {
+                    currentLine.deleteCharAt(currentLine.length() - 1);
+                }
+                return true;
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        CaseBlockEntity caseEntity = getCaseEntity();
+        boolean canType = caseEntity != null && caseEntity.getPowerState().isOn() && caseEntity.hasKeyboard();
+        if (canType && currentLine.length() < 4096) {
+            currentLine.append(codePoint);
+            return true;
+        }
+        return super.charTyped(codePoint, modifiers);
+    }
+
     private void submitCommand() {
-        String command = inputBox.getValue();
+        String command = currentLine.toString();
+        currentLine.setLength(0);
         if (command.isBlank()) {
             return;
         }
@@ -147,7 +174,6 @@ public class TerminalScreen extends Screen {
             return;
         }
         PacketDistributor.sendToServer(new RunLuaCommandPayload(pos, command));
-        inputBox.setValue("");
     }
 
     @Override
