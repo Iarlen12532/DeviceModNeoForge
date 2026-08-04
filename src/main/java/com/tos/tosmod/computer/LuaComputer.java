@@ -45,15 +45,16 @@ public class LuaComputer {
 
     /** "Liga" o computador virtual: cria um novo ambiente Lua limpo. */
     public void start() {
-        start(null, null, null, null, null, null, null);
+        start(null, null, null, null, null, null, null, null);
     }
 
     /**
      * Mesmo que start(), mas já registra as tabelas globais "network", "printer", "usb",
-     * "redstone", "fs" e "cluster" (Fase 6-10) - as funções chamam de volta a main thread
-     * via MainThreadBridge, então são seguras mesmo rodando na thread própria do Lua.
+     * "redstone", "fs", "cluster" e "gpu" (Fase 6-10 + ponte de desenho) - as funções
+     * chamam de volta a main thread via MainThreadBridge, então são seguras mesmo rodando
+     * na thread própria do Lua.
      */
-    public void start(MainThreadBridge bridge, NetworkApi networkApi, PrinterApi printerApi, UsbApi usbApi, RedstoneApi redstoneApi, FsApi fsApi, ClusterApi clusterApi) {
+    public void start(MainThreadBridge bridge, NetworkApi networkApi, PrinterApi printerApi, UsbApi usbApi, RedstoneApi redstoneApi, FsApi fsApi, ClusterApi clusterApi, GpuApi gpuApi) {
         if (running.get()) {
             return;
         }
@@ -218,6 +219,71 @@ public class LuaComputer {
                 }
             });
             globals.set("cluster", clusterTable);
+        }
+
+        if (bridge != null && gpuApi != null) {
+            LuaTable gpuTable = new LuaTable();
+            gpuTable.set("setResolution", new org.luaj.vm2.lib.TwoArgFunction() {
+                @Override
+                public LuaValue call(LuaValue w, LuaValue h) {
+                    int iw = w.optint(50);
+                    int ih = h.optint(16);
+                    return LuaValue.valueOf(bridge.call(() -> gpuApi.setResolution(iw, ih), "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("getResolution", new ZeroArgFunction() {
+                @Override
+                public LuaValue call() {
+                    return LuaValue.valueOf(bridge.call(gpuApi::getResolution, "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("set", new org.luaj.vm2.lib.VarArgFunction() {
+                @Override
+                public org.luaj.vm2.Varargs invoke(org.luaj.vm2.Varargs args) {
+                    int ix = args.optint(1, 0);
+                    int iy = args.optint(2, 0);
+                    String text = args.optjstring(3, "");
+                    return LuaValue.valueOf(bridge.call(() -> gpuApi.set(ix, iy, text), "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("fill", new org.luaj.vm2.lib.VarArgFunction() {
+                @Override
+                public org.luaj.vm2.Varargs invoke(org.luaj.vm2.Varargs args) {
+                    int ix = args.optint(1, 0);
+                    int iy = args.optint(2, 0);
+                    int iw = args.optint(3, 1);
+                    int ih = args.optint(4, 1);
+                    String ch = args.optjstring(5, " ");
+                    return LuaValue.valueOf(bridge.call(() -> gpuApi.fill(ix, iy, iw, ih, ch), "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("setForeground", new org.luaj.vm2.lib.OneArgFunction() {
+                @Override
+                public LuaValue call(LuaValue color) {
+                    int ic = color.optint(0xFFFFFF);
+                    return LuaValue.valueOf(bridge.call(() -> gpuApi.setForeground(ic), "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("setBackground", new org.luaj.vm2.lib.OneArgFunction() {
+                @Override
+                public LuaValue call(LuaValue color) {
+                    int ic = color.optint(0x000000);
+                    return LuaValue.valueOf(bridge.call(() -> gpuApi.setBackground(ic), "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("getForeground", new ZeroArgFunction() {
+                @Override
+                public LuaValue call() {
+                    return LuaValue.valueOf(bridge.call(gpuApi::getForeground, "erro: sem resposta"));
+                }
+            });
+            gpuTable.set("getBackground", new ZeroArgFunction() {
+                @Override
+                public LuaValue call() {
+                    return LuaValue.valueOf(bridge.call(gpuApi::getBackground, "erro: sem resposta"));
+                }
+            });
+            globals.set("gpu", gpuTable);
         }
 
         // Redireciona print() pra um buffer que a tela/terminal do jogo vai ler, em vez do

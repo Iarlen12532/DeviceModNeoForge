@@ -685,6 +685,96 @@ confirmar se é um bug real de renderização do mod ou um artefato da própria 
 foto (ficou incerto pelas imagens) - se continuar acontecendo depois dessas mudanças, me
 manda um vídeo curto ou tenta reproduzir de novo que eu olho com mais cuidado.
 
+## Correção: Mac Pro sem tier próprio + hierarquia real de resfriamento
+
+Você percebeu certo: o Mac Pro usava a MESMA `CaseDefinition` da torre comum (só o
+visual era diferente) - por isso tinha exatamente o mesmo resfriamento fraco e
+superaquecia igual a qualquer outra case só de ligar, mesmo sendo "pra ser a melhor".
+
+**Corrigido com 4 tiers reais** (a "capacidade de resfriamento" de cada case É o tier -
+quanto maior, mais calor ela aguenta antes de começar a esquentar de verdade):
+- **Tier 1** - Notebook Fino: cooling 90 (baseline com APU básica ≈ 65 de calor - sempre
+  fica com folga, nunca superaquece só de ligar do jeito mais simples).
+- **Tier 2** - Notebook Gamer (160), Torre comum (170), All-in-One (100): aguentam CPU/APU
+  T1 + 1 GPU T1 (quando tem slot) com folga real; só CPU/GPU T2+ juntos é que arriscam.
+- **Tier 3 (novo, premium)** - Mac Pro ganhou sua PRÓPRIA `CaseDefinition`
+  (`TOWER_DESKTOP_PRO`): 3 slots de GPU, 2 de PSU, 6 de RAM/storage, cooling 240 - aguenta
+  até 2 GPUs T1 rodando junto com folga de verdade, condizente com ser a case premium.
+- **Tier 4** - Servidor: cooling 600 (era 280) - uma build robusta (CPU/GPU T2 em dobro +
+  memória/storage cheios) fica com boa margem. Só encher TUDO com peça T3 nos 4 sockets de
+  CPU e 4 de GPU ainda seria demais até pra ele - isso é intencional, um build "no talo"
+  continua sendo um desafio de engenharia real, mesmo no maior bloco do mod.
+
+## Plano pro T.OS visual (inspirado no MineOS que você mandou)
+
+Você mandou o código-fonte real do MineOS (OpenComputers) - dei uma olhada na estrutura:
+é um sistema de ~9.500 linhas só nas bibliotecas (`GUI.lua` sozinho tem 5.101 linhas),
+construído em cima da API de tela do OpenComputers (`component.gpu.set/fill/get`, etc).
+
+**Por que não dá pra só "portar" esse código:** o TOS não tem esse tipo de API ainda -
+hoje o Lua do mod só conversa com funções de fundo (`network`, `printer`, `fs`, `redstone`,
+`cluster`); quem desenha pixel na tela é 100% o Java (`DesktopScreen`). O MineOS gigante
+não vai rodar sem antes existir uma ponte real Lua→Java de desenho (uma API tipo
+`gpu.fill(x,y,largura,altura,cor)`, `gpu.text(x,y,texto)`, janelas de verdade), que hoje
+não existe.
+
+**O plano certo, em ordem:**
+1. Construir essa ponte de desenho primeiro (uma API `gpu.*` chamável do Lua, que manda
+   comandos de desenho pro `DesktopScreen` renderizar de verdade) - é o alicerce, sem isso
+   nada mais funciona.
+2. Um gerenciador de janelas mínimo em cima dela (criar/mover/fechar janela) - inspirado no
+   `GUI.lua` do MineOS, mas escrito do zero pra essa API nova, bem mais enxuto.
+3. Os apps (Finder, Terminal gráfico, etc) por cima disso, um de cada vez.
+
+Isso é trabalho de várias sessões, não de uma mensagem só - cada camada precisa ser
+testada em jogo (igual todo o resto desse mod) antes da próxima ser construída em cima.
+
+## Ponte de desenho (API "gpu") - primeira camada da fundação gráfica
+
+Começando o plano de 3 etapas pro T.OS visual. Essa é a etapa 1: dar ao Lua uma forma
+real de desenhar na tela, em vez de só imprimir texto corrido.
+
+**Modelo escolhido: grade de caracteres coloridos** (igual a API real do OpenComputers/
+MineOS - `component.gpu`), não pixel puro. É uma tela de texto onde cada célula tem um
+caractere + cor de fundo + cor de frente. Muito mais barato de sincronizar
+(cliente↔servidor) e de renderizar em Java do que pixels de verdade, e ainda assim dá pra
+construir janelas, barras, ícones (com caracteres tipo blocos ▓█) em cima depois.
+
+- `component/ScreenBuffer.java` (novo) - a grade em si: `set(x,y,texto)`,
+  `fill(x,y,largura,altura,caractere)`, cor de frente/fundo, redimensionável (até 80x30).
+  Salva/carrega do NBT.
+- `computer/GpuApi.java` (novo) - interface da API Lua: `setResolution`, `getResolution`,
+  `set`, `fill`, `setForeground`, `setBackground`, `getForeground`, `getBackground`.
+- `CaseBlockEntity` ganhou um `ScreenBuffer` próprio + a implementação de `GpuApi`
+  (mesmo padrão das outras APIs - roda na main thread via `MainThreadBridge`, sincroniza
+  pro cliente na hora que desenha).
+- `LuaComputer` registra a tabela global `gpu` (mesmo padrão de `network`/`printer`/etc).
+- `DesktopScreen`: se um programa já desenhou algo de verdade (`buffer.isBlank() ==
+  false`), mostra a grade de caracteres célula por célula em vez do histórico de texto
+  corrido de sempre. Se nada foi desenhado ainda, continua mostrando o terminal cru
+  normalmente (nada quebrou pra quem só quer digitar comando solto).
+
+**Como testar agora** (digitando direto no terminal, sem precisar de nenhum app ainda):
+```lua
+gpu.setResolution(20, 5)
+gpu.setBackground(0x2050A0)
+gpu.fill(0, 0, 20, 5, " ")
+gpu.setForeground(0xFFFFFF)
+gpu.set(2, 2, "Hello TOS!")
+```
+Isso já deve pintar um retângulo azul com "Hello TOS!" escrito em branco na tela do
+computador.
+
+**Próximas 2 etapas do plano** (ainda não feitas):
+2. Gerenciador de janelas mínimo (`TOS.UI`) em cima dessa API - criar/mover/fechar caixas
+   de texto na grade, várias ao mesmo tempo.
+3. Apps de verdade (Finder, Terminal gráfico, etc) por cima disso.
+
+**Limitações desta primeira versão** (de propósito, pra manter o escopo real):
+- Só 1 "programa" desenha por vez - não tem múltiplas janelas ainda (isso é a etapa 2).
+- Tamanho de célula fixo (6x9px) - não escala com resolução de tela do jogador.
+- Mouse ainda não interage com a grade (só teclado, por enquanto).
+
 ## Como continuar
 
 Se abrir uma conversa nova, cole este arquivo inteiro (ou a seção relevante) e diga em qual

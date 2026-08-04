@@ -40,14 +40,15 @@ public class ModBlocks {
                     .sound(SoundType.METAL),
                     CaseDefinitions.TOWER_DESKTOP));
 
-    // Segundo visual pra mesma CaseDefinition (torre) - exatamente o ponto que a
-    // arquitetura foi desenhada pra suportar sem mexer em nenhuma lógica de jogo.
+    // Mac Pro agora tem a própria CaseDefinition (TOWER_DESKTOP_PRO) - antes usava a mesma
+    // da torre comum (TOWER_DESKTOP), por isso tinha o mesmo resfriamento fraco e
+    // superaquecia igual a qualquer outra case só de ligar.
     public static final DeferredBlock<Block> TOWER_DESKTOP_CASE_MACPRO = BLOCKS.register("tower_desktop_case_macpro",
             () -> new CaseBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .strength(3.0f)
                     .sound(SoundType.METAL),
-                    CaseDefinitions.TOWER_DESKTOP));
+                    CaseDefinitions.TOWER_DESKTOP_PRO));
 
     public static final DeferredBlock<Block> ALL_IN_ONE_CASE = BLOCKS.register("all_in_one_case",
             () -> new CaseBlock(BlockBehaviour.Properties.of()

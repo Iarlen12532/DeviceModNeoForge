@@ -6,12 +6,14 @@ import com.tos.tosmod.component.ComponentCategory;
 import com.tos.tosmod.component.ComponentStats;
 import com.tos.tosmod.component.CrashCause;
 import com.tos.tosmod.component.PowerState;
+import com.tos.tosmod.component.ScreenBuffer;
 import com.tos.tosmod.component.SlotType;
 import com.tos.tosmod.computer.LuaComputer;
 import com.tos.tosmod.computer.MainThreadBridge;
 import com.tos.tosmod.computer.NetworkApi;
 import com.tos.tosmod.computer.ClusterApi;
 import com.tos.tosmod.computer.FsApi;
+import com.tos.tosmod.computer.GpuApi;
 import com.tos.tosmod.computer.PrinterApi;
 import com.tos.tosmod.computer.RedstoneApi;
 import com.tos.tosmod.computer.UsbApi;
@@ -145,6 +147,9 @@ public class CaseBlockEntity extends BlockEntity {
      * getStorageBudgetChars()) - quanto mais forte o HD/SSD/NVMe, mais apps cabem.
      */
     private final java.util.LinkedHashMap<String, String> virtualFiles = new java.util.LinkedHashMap<>();
+
+    /** Buffer de tela (grade de caracteres) - onde a API "gpu" desenha de verdade. */
+    private final ScreenBuffer screenBuffer = new ScreenBuffer();
     private static final int MAX_FILE_NAME_LENGTH = 32;
     private static final int MAX_FILES = 64;
 
@@ -367,7 +372,7 @@ public class CaseBlockEntity extends BlockEntity {
         // caso de carregar o chunk com a máquina já ligada (o Lua reinicia do zero, igual
         // um computador real perde o estado de RAM quando desliga/liga de novo).
         if (isOnNow && !luaComputer.isRunning()) {
-            luaComputer.start(networkBridge, networkApi, printerApi, usbApi, redstoneApi, fsApi, clusterApi);
+            luaComputer.start(networkBridge, networkApi, printerApi, usbApi, redstoneApi, fsApi, clusterApi, gpuApi);
             addTerminalLine("--- TOS terminal cru (Fase 4) ---");
             addTerminalLine("Lua pronto. Digite um comando e aperte enter.");
             if (osInstalled) {
@@ -506,6 +511,77 @@ public class CaseBlockEntity extends BlockEntity {
                 }
             }
             return removed ? "apagado." : "erro: arquivo nao encontrado.";
+        }
+    };
+
+    /** Buffer de tela (só leitura pro cliente) - a DesktopScreen renderiza isso direto. */
+    public ScreenBuffer getScreenBuffer() {
+        return screenBuffer;
+    }
+
+    /**
+     * Implementação da API Lua "gpu" - a ponte de desenho de verdade. Toda função aqui
+     * mexe no ScreenBuffer da própria case e sincroniza pro cliente na hora (via
+     * sendBlockUpdated), pra quem estiver com a tela aberta ver o desenho atualizar.
+     */
+    private final GpuApi gpuApi = new GpuApi() {
+        @Override
+        public String setResolution(int width, int height) {
+            screenBuffer.resize(width, height);
+            syncToClient();
+            return "resolucao: " + screenBuffer.getWidth() + "x" + screenBuffer.getHeight();
+        }
+
+        @Override
+        public String getResolution() {
+            return screenBuffer.getWidth() + "," + screenBuffer.getHeight();
+        }
+
+        @Override
+        public String set(int x, int y, String text) {
+            if (text == null) {
+                return "erro: texto nulo.";
+            }
+            screenBuffer.set(x, y, text);
+            syncToClient();
+            return "ok";
+        }
+
+        @Override
+        public String fill(int x, int y, int width, int height, String character) {
+            char c = (character != null && !character.isEmpty()) ? character.charAt(0) : ' ';
+            screenBuffer.fill(x, y, width, height, c);
+            syncToClient();
+            return "ok";
+        }
+
+        @Override
+        public String setForeground(int color) {
+            screenBuffer.setForeground(color);
+            return "ok";
+        }
+
+        @Override
+        public String setBackground(int color) {
+            screenBuffer.setBackground(color);
+            return "ok";
+        }
+
+        @Override
+        public String getForeground() {
+            return String.valueOf(screenBuffer.getForeground());
+        }
+
+        @Override
+        public String getBackground() {
+            return String.valueOf(screenBuffer.getBackground());
+        }
+
+        private void syncToClient() {
+            setChanged();
+            if (level != null) {
+                level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+            }
         }
     };
 
@@ -1069,6 +1145,7 @@ public class CaseBlockEntity extends BlockEntity {
             filesTag.add(fileTag);
         }
         tag.put("virtual_files", filesTag);
+        tag.put("screen_buffer", screenBuffer.save());
 
         tag.putBoolean("has_industrial_monitor", hasIndustrialMonitor);
         tag.putBoolean("resource_manager_active", resourceManagerActive);
@@ -1125,6 +1202,9 @@ public class CaseBlockEntity extends BlockEntity {
                 CompoundTag fileTag = filesTag.getCompound(i);
                 virtualFiles.put(fileTag.getString("name"), fileTag.getString("content"));
             }
+        }
+        if (tag.contains("screen_buffer")) {
+            screenBuffer.load(tag.getCompound("screen_buffer"));
         }
 
         hasIndustrialMonitor = tag.getBoolean("has_industrial_monitor");

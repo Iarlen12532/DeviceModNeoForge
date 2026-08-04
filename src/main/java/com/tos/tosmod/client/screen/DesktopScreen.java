@@ -89,23 +89,30 @@ public class DesktopScreen extends Screen {
             currentLine.setLength(0);
         }
 
-        List<String> history = new ArrayList<>(caseEntity.getTerminalHistory());
-        if (canType) {
-            long now = System.currentTimeMillis();
-            if (now - lastBlinkTime > 500) {
-                cursorVisible = !cursorVisible;
-                lastBlinkTime = now;
+        com.tos.tosmod.component.ScreenBuffer buffer = caseEntity.getScreenBuffer();
+        if (!buffer.isBlank()) {
+            // Um programa já desenhou algo de verdade via gpu.* - mostra a grade de
+            // caracteres em vez do histórico de texto corrido.
+            renderScreenBuffer(graphics, buffer, panelLeft + 4, windowTop + 4);
+        } else {
+            List<String> history = new ArrayList<>(caseEntity.getTerminalHistory());
+            if (canType) {
+                long now = System.currentTimeMillis();
+                if (now - lastBlinkTime > 500) {
+                    cursorVisible = !cursorVisible;
+                    lastBlinkTime = now;
+                }
+                history.add("> " + currentLine + (cursorVisible ? "_" : ""));
             }
-            history.add("> " + currentLine + (cursorVisible ? "_" : ""));
-        }
 
-        int lineHeight = 10;
-        int maxLines = (windowBottom - windowTop - 10) / lineHeight;
-        int startIndex = Math.max(0, history.size() - maxLines);
-        int y = windowTop + 6;
-        for (int i = startIndex; i < history.size(); i++) {
-            graphics.drawString(font, history.get(i), panelLeft + 6, y, ScreenStyle.TEXT_LIGHT, false);
-            y += lineHeight;
+            int lineHeight = 10;
+            int maxLines = (windowBottom - windowTop - 10) / lineHeight;
+            int startIndex = Math.max(0, history.size() - maxLines);
+            int y = windowTop + 6;
+            for (int i = startIndex; i < history.size(); i++) {
+                graphics.drawString(font, history.get(i), panelLeft + 6, y, ScreenStyle.TEXT_LIGHT, false);
+                y += lineHeight;
+            }
         }
 
         // Dock (embaixo) - um ícone por app salvo via fs.save().
@@ -134,6 +141,30 @@ public class DesktopScreen extends Screen {
         }
 
         super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
+    /**
+     * Desenha a grade de caracteres do ScreenBuffer célula por célula - fundo (fill) só
+     * quando diferente do fundo padrão do painel (economiza desenhos), depois o caractere
+     * em cima. Tamanho de célula fixo (6x9px, aproximado da fonte padrão do Minecraft).
+     */
+    private void renderScreenBuffer(GuiGraphics graphics, com.tos.tosmod.component.ScreenBuffer buffer, int originX, int originY) {
+        int cellW = 6;
+        int cellH = 9;
+        for (int y = 0; y < buffer.getHeight(); y++) {
+            for (int x = 0; x < buffer.getWidth(); x++) {
+                int px = originX + x * cellW;
+                int py = originY + y * cellH;
+                int bg = buffer.bgAt(x, y);
+                if (bg != 0x101010) { // não redesenha se for igual ao fundo do painel (ScreenStyle.PANEL_BG)
+                    graphics.fill(px, py, px + cellW, py + cellH, 0xFF000000 | bg);
+                }
+                char c = buffer.charAt(x, y);
+                if (c != ' ') {
+                    graphics.drawString(font, String.valueOf(c), px, py, 0xFF000000 | buffer.fgAt(x, y), false);
+                }
+            }
+        }
     }
 
     @Override
